@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitSense AI | Local Wellness Desk</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <svg class="glass-defs" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.001 0.005"
+            numOctaves="1"
+            seed="17"
+            result="turbulence"
+          />
+          <feComponentTransfer in="turbulence" result="mapped">
+            <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+            <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+            <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+          </feComponentTransfer>
+          <feGaussianBlur in="turbulence" stdDeviation="3" result="soft-map" />
+          <feSpecularLighting
+            in="soft-map"
+            surfaceScale="5"
+            specularConstant="1"
+            specularExponent="100"
+            lighting-color="white"
+            result="spec-light"
+          >
+            <fePointLight x="-200" y="-200" z="300" />
+          </feSpecularLighting>
+          <feComposite
+            in="spec-light"
+            operator="arithmetic"
+            k1="0"
+            k2="1"
+            k3="1"
+            k4="0"
+            result="lit-image"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="soft-map"
+            scale="180"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+        <filter id="glass-distortion-soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.032" numOctaves="2" seed="11" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="0.7" result="soft-noise" />
+          <feDisplacementMap in="SourceGraphic" in2="soft-noise" scale="9" xChannelSelector="R" yChannelSelector="B" />
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="liquid-stage">
+      <div class="ambient-layer ambient-a"></div>
+      <div class="ambient-layer ambient-b"></div>
+      <div class="ambient-layer ambient-c"></div>
+
+      <div class="page-shell">
+        <header class="masthead glass-panel">
+          <div class="masthead-copy">
+            <p class="brand-mark">FITSENSE AI</p>
+            <p class="title-overline">训练 · 饮食 · 恢复</p>
+            <h1>
+              <span class="title-line">个性化健康</span>
+              <span class="title-line accent">方案生成器</span>
+            </h1>
+            <p class="masthead-note">输入核心身体数据后，自动拆解训练预设、饮食策略与一周执行安排。</p>
+          </div>
+
+          <div class="hero-spectrum" aria-hidden="true"></div>
+
+          <div class="liquidGlass-wrapper hero-lens" aria-hidden="true">
+            <div class="liquidGlass-effect"></div>
+            <div class="liquidGlass-tint"></div>
+            <div class="liquidGlass-shine"></div>
+            <div class="liquidGlass-text hero-lens-core">
+              <div class="hero-lens-copy">
+                <span>Training</span>
+                <span>Nutrition</span>
+                <span>Recovery</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-ribbon glass-pill-cluster" aria-hidden="true">
+            <span class="glass-pill">Liquid Glass</span>
+            <span class="glass-pill">DeepSeek Ready</span>
+            <span class="glass-pill">Weekly Planning</span>
+          </div>
+
+        <section class="hero-grid">
+          <aside class="panel control-panel glass-panel is-collapsed">
+            <button
+              type="button"
+              id="api-panel-toggle"
+              class="api-panel-toggle glass-subpanel"
+              aria-expanded="false"
+              aria-controls="api-panel-body"
+            >
+              <div class="status-head">
+                <div>
+                  <p class="panel-label">DEEPSEEK GATEWAY</p>
+                  <p class="panel-title">在线能力状态</p>
+                </div>
+                <strong id="api-badge" data-state="idle">等待配置</strong>
+              </div>
+              <span class="api-toggle-hint">点击展开</span>
+            </button>
+
+            <div id="api-panel-body" class="api-panel-body" hidden>
+              <div class="control-card glass-subpanel">
+              <p class="model-label">当前模型</p>
+              <h2 id="model-name">deepseek-v4-flash</h2>
+              <p id="api-detail" class="panel-text">
+                当前没有检测到可用的 DeepSeek API Key，你可以在下方填写自己的 Key。
+              </p>
+              </div>
+
+              <form id="api-config-form" class="api-config-form glass-subpanel">
+                <label for="api-key-input">
+                  <span>你的 DeepSeek API Key</span>
+                  <input id="api-key-input" type="password" autocomplete="off" placeholder="sk-..." />
+                </label>
+                <div class="api-actions">
+                  <button type="submit" class="primary-button">保存到浏览器</button>
+                  <button type="button" id="clear-api-key" class="secondary-button">清除</button>
+                </div>
+                <p id="api-key-status" class="helper-text">
+                  Key 仅保存在当前浏览器，本地服务会在你提交分析时代理请求。
+                </p>
+              </form>
+            </div>
+          </aside>
+        </section>
+        </header>
+
+        <main class="content-grid">
+          <section class="panel card glass-panel">
+            <div class="section-heading">
+              <p class="eyebrow">STEP 01</p>
+              <h2>输入基础健康信息</h2>
+            </div>
+
+            <form id="health-form" class="health-form">
+              <label>
+                年龄
+                <input type="number" name="age" min="12" max="80" value="21" required />
+              </label>
+
+              <label>
+                性别
+                <select name="gender" required>
+                  <option value="male">男</option>
+                  <option value="female">女</option>
+                  <option value="other">其他</option>
+                </select>
+              </label>
+
+              <label>
+                身高(cm)
+                <input type="number" name="height" min="120" max="220" value="175" required />
+              </label>
+
+              <label>
+                体重(kg)
+                <input type="number" name="weight" min="30" max="200" value="70" required />
+              </label>
+
+              <label>
+                日常活动水平
+                <select name="activityLevel" required>
+                  <option value="low">较低</option>
+                  <option value="light">轻度</option>
+                  <option value="moderate" selected>中等</option>
+                  <option value="high">较高</option>
+                </select>
+              </label>
+
+              <label>
+                每周训练次数
+                <input type="number" name="weeklyWorkouts" min="0" max="14" value="3" required />
+              </label>
+
+              <label class="wide">
+                健身目标
+                <select name="goal" required>
+                  <option value="general_fitness">综合健康</option>
+                  <option value="fat_loss">减脂</option>
+                  <option value="muscle_gain" selected>增肌</option>
+                  <option value="endurance">耐力提升</option>
+                </select>
+              </label>
+
+              <button type="submit" class="primary-button submit-button">生成健康报告</button>
+            </form>
+          </section>
+
+          <section class="panel card glass-panel">
+            <div class="section-heading">
+              <p class="eyebrow">STEP 02</p>
+              <h2>结构化概览</h2>
+            </div>
+
+            <div id="stat-grid" class="stat-grid">
+              <article class="stat-box glass-subpanel">
+                <span class="stat-label">BMI</span>
+                <strong id="bmi-value">-</strong>
+                <span id="bmi-category">等待输入</span>
+              </article>
+
+              <article class="stat-box glass-subpanel">
+                <span class="stat-label">活动评分</span>
+                <strong id="activity-score">-</strong>
+                <span id="activity-label">等待输入</span>
+              </article>
+
+              <article class="stat-box glass-subpanel">
+                <span class="stat-label">目标重点</span>
+                <strong id="goal-title">-</strong>
+                <span id="goal-text">等待输入</span>
+              </article>
+            </div>
+
+            <div class="meter-group">
+              <div class="meter glass-subpanel">
+                <div class="meter-labels">
+                  <span>身体状态平衡度</span>
+                  <span id="condition-score-label">0%</span>
+                </div>
+                <div class="meter-track">
+                  <div id="condition-meter" class="meter-fill"></div>
+                </div>
+              </div>
+
+              <div class="meter glass-subpanel">
+                <div class="meter-labels">
+                  <span>训练准备度</span>
+                  <span id="training-score-label">0%</span>
+                </div>
+                <div class="meter-track alt">
+                  <div id="training-meter" class="meter-fill alt"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chips" id="risk-flags">
+              <span class="chip muted">暂未分析</span>
+            </div>
+          </section>
+
+          <section class="panel card report-card glass-panel">
+            <div class="section-heading report-heading">
+              <div>
+                <p class="eyebrow">STEP 03</p>
+                <h2>训练与饮食报告</h2>
+              </div>
+              <div class="insight-meta glass-subpanel">
+                <span id="source-pill" class="source-pill">等待中</span>
+                <span id="status-text" hidden></span>
+              </div>
+            </div>
+
+            <div class="report-tabs" role="tablist" aria-label="报告内容切换">
+              <span class="report-tab-lens liquidGlass-wrapper" aria-hidden="true">
+                <span class="liquidGlass-effect"></span>
+                <span class="liquidGlass-tint"></span>
+                <span class="liquidGlass-shine"></span>
+              </span>
+              <button type="button" class="report-tab is-active" data-report-tab="overview" role="tab" aria-selected="true">总览</button>
+              <button type="button" class="report-tab" data-report-tab="training" role="tab" aria-selected="false">训练预设</button>
+              <button type="button" class="report-tab" data-report-tab="nutrition" role="tab" aria-selected="false">饮食策略</button>
+            </div>
+
+            <section class="report-panel is-active" data-report-panel="overview" role="tabpanel">
+              <article class="summary-band glass-subpanel">
+                <p class="summary-label">整体判断</p>
+                <p id="report-summary" class="summary-text">你的健康总结会显示在这里。</p>
+                <p id="report-closing" class="summary-foot">先把规律建立起来，再做更复杂的微调。</p>
+              </article>
+
+              <div class="overview-grid">
+                <article class="overview-card glass-subpanel">
+                  <p class="module-kicker">TRAINING DIRECTION</p>
+                  <h3 id="training-headline">-</h3>
+                  <p id="training-overview" class="module-copy">-</p>
+                </article>
+
+                <article class="overview-card glass-subpanel">
+                  <p class="module-kicker">NUTRITION DIRECTION</p>
+                  <div class="nutrition-banner compact">
+                    <span class="strategy-tag">主策略</span>
+                    <strong id="nutrition-strategy">-</strong>
+                  </div>
+                  <p id="nutrition-overview" class="module-copy">-</p>
+                </article>
+              </div>
+            </section>
+
+            <section class="report-panel" data-report-panel="training" role="tabpanel" hidden>
+              <article class="module-card module-card-wide glass-subpanel">
+                <div class="module-head">
+                  <p class="module-kicker">TRAINING MODULE</p>
+                  <h3>训练计划预设</h3>
+                </div>
+
+                <div id="training-presets" class="preset-grid">
+                  <article class="preset-card">
+                    <div class="preset-head">
+                      <strong>等待生成</strong>
+                      <span class="recommendation-pill">-</span>
+                    </div>
+                    <p class="preset-cadence">-</p>
+                    <p class="preset-summary">-</p>
+                    <p class="preset-focus">-</p>
+                  </article>
+                </div>
+
+                <div class="training-detail-grid">
+                  <div class="detail-block glass-mini-card">
+                    <p class="detail-label">当前周安排建议</p>
+                    <ul id="training-schedule" class="detail-list">
+                      <li>等待生成</li>
+                    </ul>
+                  </div>
+
+                  <div class="detail-block glass-mini-card">
+                    <p class="detail-label">执行提醒</p>
+                    <ul id="training-actions" class="detail-list">
+                      <li>等待生成</li>
+                    </ul>
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            <section class="report-panel" data-report-panel="nutrition" role="tabpanel" hidden>
+              <article class="module-card module-card-wide glass-subpanel">
+                <div class="module-head">
+                  <p class="module-kicker">NUTRITION MODULE</p>
+                  <h3>饮食策略与方法</h3>
+                </div>
+
+                <div class="nutrition-banner">
+                  <span class="strategy-tag">主策略</span>
+                  <strong id="nutrition-strategy-panel">-</strong>
+                </div>
+                <p id="nutrition-overview-panel" class="module-copy">-</p>
+
+                <div class="detail-block glass-mini-card">
+                  <p class="detail-label">执行建议</p>
+                  <ul id="nutrition-actions" class="detail-list">
+                    <li>等待生成</li>
+                  </ul>
+                </div>
+
+                <div class="detail-block">
+                  <p class="detail-label">方法推荐</p>
+                  <div id="nutrition-methods" class="method-grid">
+                    <article class="method-card">
+                      <div class="method-head">
+                        <strong>等待生成</strong>
+                        <span class="method-fit">-</span>
+                      </div>
+                      <p>-</p>
+                    </article>
+                  </div>
+                </div>
+
+                <div class="detail-block caution-block glass-mini-card">
+                  <p class="detail-label">边界提醒</p>
+                  <p id="nutrition-caution" class="caution-text">等待生成</p>
+                </div>
+              </article>
+            </section>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <section id="nutrition-detail-view" class="detail-view" hidden>
+      <div class="detail-backdrop" data-detail-close></div>
+      <article class="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+        <div class="detail-toolbar">
+          <button type="button" id="detail-back" class="ghost-button">返回报告</button>
+          <button type="button" id="detail-close" class="ghost-button">关闭</button>
+        </div>
+
+        <header class="detail-header">
+          <p class="eyebrow" id="detail-kicker">NUTRITION DETAIL</p>
+          <h2 id="detail-title">饮食方法详情</h2>
+          <p id="detail-subtitle" class="detail-subtitle">这里会显示每种饮食方法的一周安排。</p>
+          <p id="detail-pattern" class="detail-pattern"></p>
+        </header>
+
+        <section class="detail-section">
+          <div id="detail-targets" class="detail-target-grid"></div>
+        </section>
+
+        <section class="detail-section">
+          <div class="detail-section-head">
+            <p class="eyebrow">WEEK PLAN</p>
+            <h3>一周安排</h3>
+          </div>
+          <div id="detail-week" class="detail-week-grid"></div>
+        </section>
+
+        <section class="detail-columns">
+          <article class="detail-card">
+            <p class="detail-label">执行原则</p>
+            <ul id="detail-principles" class="detail-list"></ul>
+          </article>
+
+          <article class="detail-card">
+            <p class="detail-label">训练配合</p>
+            <ul id="detail-training-notes" class="detail-list"></ul>
+          </article>
+        </section>
+
+        <section class="detail-columns detail-columns-bottom">
+          <article class="detail-card">
+            <p class="detail-label">补剂参考</p>
+            <ul id="detail-supplements" class="detail-list"></ul>
+          </article>
+
+          <article class="detail-card caution-card">
+            <p class="detail-label">边界提醒</p>
+            <p id="detail-caution" class="caution-text"></p>
+          </article>
+        </section>
+      </article>
+    </section>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
