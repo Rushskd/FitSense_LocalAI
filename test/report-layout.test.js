@@ -33,3 +33,15 @@ test("hero api entry and report spacing follow the annotated layout", async () =
   assert.match(css, /\.masthead:has\(\.control-panel\.is-open\)\s*\{[^}]*overflow:\s*visible;/s);
   assert.match(css, /\.api-panel-body\s*\{[^}]*position:\s*absolute;[^}]*top:\s*calc\(100% \+ 12px\);/s);
 });
+
+test("github pages can serve the static app from a project subpath", async () => {
+  const rootHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.match(rootHtml, /url=\.\/public\//);
+  assert.match(html, /href="\.\/styles\.css"/);
+  assert.match(html, /src="\.\/app\.js"/);
+  assert.doesNotMatch(html, /(href|src)="\//);
+  assert.doesNotMatch(css, /url\("\//);
+});
