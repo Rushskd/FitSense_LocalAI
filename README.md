@@ -1,0 +1,1 @@
+# FitSense_LocalAI
