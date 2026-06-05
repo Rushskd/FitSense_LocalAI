@@ -266,11 +266,6 @@ button {
   min-height: 360px;
 }
 
-.masthead:has(.control-panel.is-open) {
-  overflow: visible;
-  z-index: 8;
-}
-
 .masthead-copy {
   max-width: 720px;
   position: relative;
@@ -431,19 +426,61 @@ h3 {
 .hero-grid {
   display: grid;
   grid-template-columns: 1fr;
-  position: absolute;
-  right: 34px;
-  bottom: 26px;
-  z-index: 5;
-  width: min(300px, calc(100% - 68px));
+  position: fixed;
+  right: clamp(16px, 3vw, 34px);
+  bottom: clamp(16px, 3vw, 28px);
+  z-index: 40;
+  width: min(304px, calc(100vw - 32px));
   margin-bottom: 0;
+  isolation: isolate;
+  transition:
+    width 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.hero-grid:has(.control-panel.is-open) {
+  width: min(340px, calc(100vw - 32px));
+}
+
+.hero-grid::before {
+  content: "";
+  position: absolute;
+  inset: -28px -24px -24px;
+  z-index: -1;
+  border-radius: 42px;
+  pointer-events: none;
+  opacity: 0.28;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.88), transparent 28%),
+    radial-gradient(circle at 74% 78%, rgba(68, 184, 255, 0.42), transparent 42%),
+    linear-gradient(135deg, rgba(255, 205, 129, 0.4), rgba(127, 226, 255, 0.2));
+  filter: blur(18px) saturate(150%);
+  transform: scale(0.92);
+  transition:
+    opacity 360ms ease,
+    filter 360ms ease,
+    transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.hero-grid:has(.control-panel.is-open)::before {
+  opacity: 0.82;
+  filter: blur(34px) saturate(190%);
+  transform: scale(1.04);
+  animation: floatingHalo 6.5s ease-in-out infinite alternate;
 }
 
 .hero-grid .control-panel {
-  overflow: visible;
+  overflow: hidden;
+  transition:
+    border-radius 360ms ease,
+    padding 360ms ease,
+    max-width 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .hero-grid .control-panel.is-open {
+  max-width: 340px;
+  max-height: calc(100vh - 36px);
+  overflow: auto;
   z-index: 7;
 }
 
@@ -703,8 +740,8 @@ h3 {
 }
 
 .control-card {
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: 12px;
+  margin-bottom: 0;
 }
 
 .api-panel-toggle {
@@ -724,9 +761,22 @@ h3 {
     border-radius 360ms cubic-bezier(0.175, 0.885, 0.32, 2.2);
 }
 
+.control-panel.is-open .api-panel-toggle {
+  padding: 10px 12px;
+  border-radius: 22px;
+}
+
 .control-panel.is-collapsed .api-panel-toggle {
   padding: 10px 12px;
   border-radius: 20px;
+}
+
+.control-panel.is-open .panel-label {
+  font-size: 0.7rem;
+}
+
+.control-panel.is-open .panel-title {
+  font-size: 1.06rem;
 }
 
 .control-panel.is-collapsed .panel-label {
@@ -741,6 +791,12 @@ h3 {
   min-height: 34px;
   padding: 8px 12px;
   font-size: 0.84rem;
+}
+
+.control-panel.is-open #api-badge {
+  min-height: 34px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
 }
 
 .api-panel-toggle:hover {
@@ -778,12 +834,11 @@ h3 {
 }
 
 .api-panel-body {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 12px);
-  z-index: 8;
-  width: min(360px, calc(100vw - 64px));
-  margin-top: 0;
+  position: static;
+  display: grid;
+  gap: 8px;
+  width: auto;
+  margin-top: 8px;
   animation: panelIn 320ms ease both;
 }
 
@@ -792,7 +847,25 @@ h3 {
 }
 
 .api-config-form {
-  padding: 18px;
+  padding: 12px;
+}
+
+.api-config-form label {
+  gap: 8px;
+}
+
+#model-name {
+  margin: 6px 0 8px;
+  font-size: clamp(1.06rem, 1.24vw, 1.22rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+#api-detail,
+#api-key-status {
+  font-size: 0.86rem;
+  line-height: 1.55;
 }
 
 .status-head,
@@ -1156,7 +1229,7 @@ h3 {
   width: fit-content;
   margin-top: 22px;
   padding: 12px;
-  gap: 10px;
+  gap: 16px;
   border-radius: var(--pill);
   border: 1px solid rgba(255, 255, 255, 0.38);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.18));
@@ -1173,8 +1246,8 @@ h3 {
   border: 1px solid transparent;
   background: transparent;
   color: var(--muted-strong);
-  min-width: 108px;
-  padding: 14px 24px;
+  min-width: 116px;
+  padding: 13px 24px;
   font-weight: 600;
   transition:
     color 220ms ease,
@@ -1673,6 +1746,18 @@ h3 {
   }
 }
 
+@keyframes floatingHalo {
+  from {
+    opacity: 0.72;
+    transform: translate3d(-3px, 2px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 0.9;
+    transform: translate3d(4px, -3px, 0) scale(1.06);
+  }
+}
+
 @keyframes pagePatternMove {
   from {
     background-position: 0 0, 0 0, center, center;
@@ -1779,9 +1864,11 @@ h3 {
   }
 
   .hero-grid {
-    position: static;
-    width: 100%;
-    margin-bottom: 20px;
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    width: min(332px, calc(100vw - 20px));
+    margin-bottom: 0;
   }
 
   .api-panel-body {

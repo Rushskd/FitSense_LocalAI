@@ -20,18 +20,22 @@ test("report layout hides raw reply tab and includes nutrition detail view", asy
 test("hero api entry and report spacing follow the annotated layout", async () => {
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
   const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
-  const heroStart = html.indexOf('<section class="hero-grid">');
+  const heroStart = html.indexOf('<section class="hero-grid"');
   const mastheadEnd = html.indexOf("</header>");
 
   assert.ok(heroStart > -1);
-  assert.ok(heroStart < mastheadEnd);
-  assert.match(css, /\.hero-grid\s*\{[^}]*position:\s*absolute;[^}]*right:\s*34px;[^}]*bottom:\s*26px;/s);
+  assert.ok(heroStart > mastheadEnd);
+  assert.match(css, /\.hero-grid\s*\{[^}]*position:\s*fixed;[^}]*right:\s*clamp\(16px,\s*3vw,\s*34px\);[^}]*bottom:\s*clamp\(16px,\s*3vw,\s*28px\);/s);
   assert.doesNotMatch(css, /\.hero-grid\s*\{[^}]*top:\s*260px;/s);
-  assert.match(css, /\.report-tabs\s*\{[^}]*gap:\s*10px;/s);
+  assert.match(css, /\.report-tabs\s*\{[^}]*gap:\s*16px;/s);
+  assert.match(css, /\.report-tab\s*\{[^}]*padding:\s*13px 24px;/s);
   assert.match(css, /\.report-panel\s*\{[^}]*margin-top:\s*56px;/s);
   assert.match(css, /\.overview-grid,\s*\.training-detail-grid\s*\{[^}]*gap:\s*50px;/s);
-  assert.match(css, /\.masthead:has\(\.control-panel\.is-open\)\s*\{[^}]*overflow:\s*visible;/s);
-  assert.match(css, /\.api-panel-body\s*\{[^}]*position:\s*absolute;[^}]*top:\s*calc\(100% \+ 12px\);/s);
+  assert.doesNotMatch(css, /\.masthead:has\(\.control-panel\.is-open\)/);
+  assert.match(css, /\.hero-grid:has\(\.control-panel\.is-open\)\s*\{[^}]*width:\s*min\(340px,\s*calc\(100vw - 32px\)\);/s);
+  assert.match(css, /\.hero-grid:has\(\.control-panel\.is-open\)::before\s*\{[^}]*opacity:\s*0\.82;[^}]*filter:\s*blur\(34px\) saturate\(190%\);[^}]*animation:\s*floatingHalo/s);
+  assert.match(css, /\.api-panel-body\s*\{[^}]*position:\s*static;[^}]*margin-top:\s*8px;/s);
+  assert.doesNotMatch(css, /\.api-panel-body\s*\{[^}]*position:\s*absolute;/s);
 });
 
 test("github pages can serve the static app from a project subpath", async () => {
