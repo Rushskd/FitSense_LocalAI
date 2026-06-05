@@ -38,6 +38,19 @@ test("hero api entry and report spacing follow the annotated layout", async () =
   assert.doesNotMatch(css, /\.api-panel-body\s*\{[^}]*position:\s*absolute;/s);
 });
 
+test("mobile layout removes the hero lens and uses a phone-first rhythm", async () => {
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.doesNotMatch(html, /hero-lens/);
+  assert.doesNotMatch(html, /hero-lens-copy/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.masthead\s*\{[^}]*min-height:\s*300px;[^}]*padding:\s*24px 20px 28px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.content-grid\s*\{[^}]*gap:\s*18px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-tabs\s*\{[^}]*width:\s*100%;[^}]*overflow-x:\s*auto;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.hero-grid\s*\{[^}]*bottom:\s*calc\(10px \+ env\(safe-area-inset-bottom\)\);/);
+  assert.match(css, /@media \(max-width:\s*520px\)\s*\{[\s\S]*\.masthead h1\s*\{[^}]*font-size:\s*clamp\(2\.72rem,\s*17vw,\s*4\.15rem\);/);
+});
+
 test("github pages can serve the static app from a project subpath", async () => {
   const rootHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");

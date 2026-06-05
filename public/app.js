@@ -580,60 +580,7 @@ function toggleApiPanel() {
   apiPanelToggle.closest(".control-panel")?.classList.toggle("is-collapsed", !nextExpanded);
 }
 
-function initLiquidHeroMotion() {
-  const masthead = document.querySelector(".masthead");
-  const lens = document.querySelector(".hero-lens");
-
-  if (!masthead || !lens || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    return;
-  }
-
-  let targetX = 0;
-  let targetY = 0;
-  let currentX = 0;
-  let currentY = 0;
-  let targetRotate = -4;
-  let currentRotate = -4;
-  let targetScale = 1;
-  let currentScale = 1;
-
-  function tick() {
-    currentX += (targetX - currentX) * 0.09;
-    currentY += (targetY - currentY) * 0.09;
-    currentRotate += (targetRotate - currentRotate) * 0.08;
-    currentScale += (targetScale - currentScale) * 0.08;
-
-    lens.style.setProperty("--lens-x", `${currentX.toFixed(2)}px`);
-    lens.style.setProperty("--lens-y", `${currentY.toFixed(2)}px`);
-    lens.style.setProperty("--lens-rotate", `${currentRotate.toFixed(2)}deg`);
-    lens.style.setProperty("--lens-scale", currentScale.toFixed(3));
-
-    requestAnimationFrame(tick);
-  }
-
-  masthead.addEventListener("pointermove", (event) => {
-    const rect = masthead.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width - 0.5;
-    const y = (event.clientY - rect.top) / rect.height - 0.5;
-
-    targetX = x * 42;
-    targetY = y * 28;
-    targetRotate = -4 + x * 10;
-    targetScale = 1.035;
-  });
-
-  masthead.addEventListener("pointerleave", () => {
-    targetX = 0;
-    targetY = 0;
-    targetRotate = -4;
-    targetScale = 1;
-  });
-
-  requestAnimationFrame(tick);
-}
-
 apiKeyInput.value = localApiConfig.apiKey;
-initLiquidHeroMotion();
 initReportTabLiquid();
 loadApiStatus();
 apiPanelToggle?.addEventListener("click", toggleApiPanel);
