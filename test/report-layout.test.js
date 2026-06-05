@@ -76,3 +76,18 @@ test("github pages can serve the static app from a project subpath", async () =>
   assert.doesNotMatch(html, /(href|src)="\//);
   assert.doesNotMatch(css, /url\("\//);
 });
+
+test("site branding links to the project github with logo placements", async () => {
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.match(html, /class="masthead-brandbar"/);
+  assert.match(html, /class="site-logo"/);
+  assert.match(html, /class="site-footer glass-panel"/);
+  assert.match(html, /由 Rushskd 制作/);
+  assert.match(html, /https:\/\/github\.com\/Rushskd\/FitSense_LocalAI/g);
+  assert.match(css, /\.masthead-brandbar\s*\{[^}]*justify-content:\s*space-between;/s);
+  assert.match(css, /\.site-logo\s*\{[^}]*backdrop-filter:\s*blur\(20px\) saturate\(165%\);/s);
+  assert.match(css, /\.site-footer\s*\{[^}]*margin-top:\s*26px;/s);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.site-footer\s*\{[^}]*flex-direction:\s*column;/);
+});
