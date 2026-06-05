@@ -1506,8 +1506,8 @@ h3 {
   margin-top: 64px;
 }
 
-.report-panel .summary-band + .overview-grid {
-  margin-top: 58px;
+.report-panel[data-report-panel="overview"] > .overview-grid {
+  margin-top: 72px;
 }
 
 .report-panel.is-active {
@@ -2348,8 +2348,8 @@ h3 {
     margin-top: 44px;
   }
 
-  .report-panel .summary-band + .overview-grid {
-    margin-top: 36px;
+  .report-panel[data-report-panel="overview"] > .overview-grid {
+    margin-top: 44px;
   }
 
   .precision-panel {

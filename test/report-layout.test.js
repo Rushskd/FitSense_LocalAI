@@ -171,12 +171,12 @@ test("report tabs and data cards keep breathable spacing without heavy backdrop 
   assert.doesNotMatch(css, /rgba\(21,\s*33,\s*55,\s*0\.7\)/);
   assert.doesNotMatch(css, /rgba\(35,\s*53,\s*83,\s*0\.58\)/);
   assert.match(css, /\.report-panel\s*\{[^}]*margin-top:\s*64px;/s);
-  assert.match(css, /\.report-panel\s+\.summary-band\s*\+\s*\.overview-grid\s*\{[^}]*margin-top:\s*58px;/s);
+  assert.match(css, /\.report-panel\[data-report-panel="overview"\]\s*>\s*\.overview-grid\s*\{[^}]*margin-top:\s*72px;/s);
   assert.match(css, /\.preset-grid\s*\{[^}]*margin-top:\s*40px;/s);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-tab\s*\{[^}]*min-height:\s*46px;[^}]*padding:\s*12px 20px;/);
   assert.match(css, /@media \(max-width:\s*520px\)\s*\{[\s\S]*\.report-tab\s*\{[^}]*padding-inline:\s*20px;/);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-panel\s*\{[^}]*margin-top:\s*44px;/);
-  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-panel\s+\.summary-band\s*\+\s*\.overview-grid\s*\{[^}]*margin-top:\s*36px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-panel\[data-report-panel="overview"\]\s*>\s*\.overview-grid\s*\{[^}]*margin-top:\s*44px;/);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.overview-grid,\s*\.training-detail-grid\s*\{[^}]*gap:\s*30px;/);
 });
 
