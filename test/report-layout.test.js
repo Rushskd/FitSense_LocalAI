@@ -91,3 +91,25 @@ test("site branding links to the project github with logo placements", async () 
   assert.match(css, /\.site-footer\s*\{[^}]*margin-top:\s*26px;/s);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.site-footer\s*\{[^}]*flex-direction:\s*column;/);
 });
+
+test("report tabs use a fast font path while preserving the display title font", async () => {
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.match(html, /rel="preload" href="\.\/assets\/fonts\/ZhuoTeYueDongHei-2\.otf" as="font" type="font\/otf" crossorigin/);
+  assert.match(css, /--font-ui-fast:\s*"Segoe UI Variable Text",\s*"Microsoft YaHei UI",\s*"PingFang SC",\s*"Noto Sans SC",\s*sans-serif;/);
+  assert.match(css, /\.report-tab\s*\{[^}]*font-family:\s*var\(--font-ui-fast\);/s);
+  assert.doesNotMatch(css, /\.report-tab\s*\{[^}]*font-family:\s*var\(--font-body\);/s);
+});
+
+test("mobile keeps the glass look with cheaper scrolling effects", async () => {
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*body::before\s*\{[^}]*display:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.liquid-stage::before\s*\{[^}]*position:\s*absolute;[^}]*height:\s*520px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.glass-panel,\s*\.glass-subpanel,\s*\.glass-mini-card,[\s\S]*backdrop-filter:\s*blur\(10px\) saturate\(126%\);/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-tabs\s*\{[^}]*backdrop-filter:\s*blur\(10px\) saturate\(126%\);/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-tab\s*\{[^}]*backdrop-filter:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.liquidGlass-effect\s*\{[^}]*filter:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.hero-grid\s*\{[^}]*contain:\s*layout paint style;/);
+});
