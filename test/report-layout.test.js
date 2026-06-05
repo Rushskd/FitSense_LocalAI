@@ -51,6 +51,18 @@ test("mobile layout removes the hero lens and uses a phone-first rhythm", async 
   assert.match(css, /@media \(max-width:\s*520px\)\s*\{[\s\S]*\.masthead h1\s*\{[^}]*font-size:\s*clamp\(2\.72rem,\s*17vw,\s*4\.15rem\);/);
 });
 
+test("mobile layout trims expensive effects while keeping the signature look", async () => {
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+  const appJs = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(css, /\.report-panel,\s*\.preset-card,\s*\.method-card,\s*\.detail-target-card,\s*\.week-card,\s*\.detail-card,\s*\.overview-card,\s*\.module-card,\s*\.report-box\s*\{[^}]*content-visibility:\s*auto;[^}]*contain-intrinsic-size:\s*320px;/s);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*:root\s*\{[^}]*--font-display:\s*"PingFang SC"[^}]*--font-body:\s*"PingFang SC"/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*body\s*\{[^}]*animation:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.hero-spectrum\s*\{[^}]*animation:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-tab-lens\s*\{[^}]*display:\s*none;/);
+  assert.match(appJs, /window\.matchMedia\("\(pointer:\s*coarse\)"\)\.matches/);
+});
+
 test("github pages can serve the static app from a project subpath", async () => {
   const rootHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");

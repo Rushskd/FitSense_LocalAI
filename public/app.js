@@ -409,7 +409,12 @@ function syncReportTabLens(tabId) {
 }
 
 function initReportTabLiquid() {
-  if (!reportTabsContainer || !reportTabLens || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (
+    !reportTabsContainer ||
+    !reportTabLens ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    window.matchMedia("(pointer: coarse)").matches
+  ) {
     return;
   }
 
