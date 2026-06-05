@@ -166,6 +166,10 @@ test("report tabs and data cards keep breathable spacing without heavy backdrop 
   const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
 
   assert.match(css, /\.report-card::before,\s*\.report-card::after\s*\{[^}]*display:\s*none;/s);
+  assert.match(css, /\.report-card\s*\{[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*backdrop-filter:\s*none;/s);
+  assert.match(css, /\.report-box\s*\{[^}]*background:\s*linear-gradient\(180deg,\s*rgba\(255,\s*255,\s*255,\s*0\.3\),\s*rgba\(255,\s*255,\s*255,\s*0\.18\)\);/s);
+  assert.doesNotMatch(css, /rgba\(21,\s*33,\s*55,\s*0\.7\)/);
+  assert.doesNotMatch(css, /rgba\(35,\s*53,\s*83,\s*0\.58\)/);
   assert.match(css, /\.report-panel\s*\{[^}]*margin-top:\s*64px;/s);
   assert.match(css, /\.report-panel\s+\.summary-band\s*\+\s*\.overview-grid\s*\{[^}]*margin-top:\s*58px;/s);
   assert.match(css, /\.preset-grid\s*\{[^}]*margin-top:\s*32px;/s);

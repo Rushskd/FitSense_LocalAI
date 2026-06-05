@@ -1210,6 +1210,11 @@ h3 {
 .report-card {
   grid-column: 1 / -1;
   padding: 32px;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: transparent;
 }
 
 .report-card::before {
@@ -1735,18 +1740,18 @@ h3 {
 }
 
 .report-box {
-  background: linear-gradient(180deg, rgba(21, 33, 55, 0.7), rgba(35, 53, 83, 0.58));
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.18));
+  border: 1px solid var(--line);
 }
 
 .report-box h3 {
   margin-bottom: 10px;
-  color: rgba(255, 255, 255, 0.94);
+  color: var(--ink);
 }
 
 .report-box p {
   margin: 0;
-  color: rgba(239, 246, 255, 0.84);
+  color: var(--muted-strong);
   white-space: pre-wrap;
 }
 
