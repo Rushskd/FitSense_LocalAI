@@ -15,6 +15,8 @@ test("report layout hides raw reply tab and includes nutrition detail view", asy
   assert.match(html, /class="report-tab-lens liquidGlass-wrapper"/);
   assert.match(html, /id="api-panel-toggle"/);
   assert.match(html, /id="api-panel-body" class="api-panel-body" hidden/);
+  assert.match(html, /id="precision-panel"/);
+  assert.match(html, /id="precision-progress"/);
 });
 
 test("hero api entry and report spacing follow the annotated layout", async () => {

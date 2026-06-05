@@ -1243,6 +1243,56 @@ h3 {
   padding: 22px;
 }
 
+.precision-panel {
+  margin-top: 20px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(122, 207, 255, 0.22), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.2));
+}
+
+.precision-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.precision-head h3 {
+  margin-top: 8px;
+  font-size: 1.45rem;
+  line-height: 1.18;
+}
+
+.precision-metrics,
+.precision-bottom {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.precision-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.precision-bottom {
+  grid-template-columns: 1.05fr 1fr;
+}
+
+.precision-stat,
+.precision-note {
+  border-radius: 24px;
+  padding: 18px;
+}
+
+.precision-stat strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
 .summary-text {
   margin: 10px 0 12px;
   font-size: 1.06rem;
@@ -1890,6 +1940,36 @@ h3 {
 
   .report-panel .summary-band + .overview-grid {
     margin-top: 26px;
+  }
+
+  .precision-panel {
+    margin-top: 16px;
+    padding: 18px 16px;
+  }
+
+  .precision-head,
+  .precision-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .precision-head {
+    display: grid;
+    gap: 12px;
+  }
+
+  .precision-head h3 {
+    font-size: 1.2rem;
+  }
+
+  .precision-metrics,
+  .precision-bottom {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .precision-stat,
+  .precision-note {
+    padding: 16px;
   }
 
   .overview-grid,

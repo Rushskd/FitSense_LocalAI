@@ -121,6 +121,7 @@ test("buildDeepSeekRequestBody requests structured json and gradual carb reducti
   assert.match(body.messages[1].content, /Mifflin-St Jeor/);
   assert.match(body.messages[1].content, /TDEE/);
   assert.match(body.messages[1].content, /至少给出 4 条/);
+  assert.match(body.messages[1].content, /"precision"/);
   assert.match(body.messages[0].content, /资深中文健身教练/);
   assert.match(body.messages[1].content, /presets/);
   assert.match(body.messages[1].content, /性别: 男/);
@@ -159,7 +160,21 @@ test("parseStructuredReport keeps valid sections from ai output", () => {
       },
       closing: "新的收束建议"
     }),
-    fallbackPlan
+    fallbackPlan,
+    {
+      profile: {
+        age: 21,
+        gender: "male",
+        height: 175,
+        weight: 70,
+        activityLevel: "moderate",
+        weeklyWorkouts: 3,
+        goal: "muscle_gain"
+      },
+      analysis: {
+        riskFlags: ["基础状态良好"]
+      }
+    }
   );
 
   assert.equal(structured.summary, "新的总览");
@@ -167,6 +182,7 @@ test("parseStructuredReport keeps valid sections from ai output", () => {
   assert.equal(structured.training.presets[0].name, "三练基础版");
   assert.equal(structured.nutrition.strategy, "中低碳高蛋白");
   assert.equal(structured.nutrition.methods[0].name, "碳水渐降");
+  assert.ok(structured.precision.calorieTarget.length > 0);
 });
 
 test("parseStructuredReport keeps up to five action items from ai output", () => {
@@ -198,7 +214,27 @@ test("parseStructuredReport keeps up to five action items from ai output", () =>
 });
 
 test("parseStructuredReport falls back when ai output is not valid json", () => {
-  const structured = parseStructuredReport("这不是 JSON", fallbackPlan);
+  const structured = parseStructuredReport(
+    "这不是 JSON",
+    fallbackPlan,
+    {
+      profile: {
+        age: 21,
+        gender: "male",
+        height: 175,
+        weight: 70,
+        activityLevel: "moderate",
+        weeklyWorkouts: 3,
+        goal: "muscle_gain"
+      },
+      analysis: {
+        riskFlags: ["基础状态良好"]
+      }
+    }
+  );
 
-  assert.deepEqual(structured, fallbackPlan);
+  assert.equal(structured.summary, fallbackPlan.summary);
+  assert.equal(structured.training.headline, fallbackPlan.training.headline);
+  assert.ok(structured.precision.proteinTarget.includes("g/天"));
+  assert.ok(structured.precision.progressChecks.length >= 2);
 });

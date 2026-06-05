@@ -35,6 +35,14 @@ const riskFlags = document.querySelector("#risk-flags");
 
 const reportSummary = document.querySelector("#report-summary");
 const reportClosing = document.querySelector("#report-closing");
+const precisionPanel = document.querySelector("#precision-panel");
+const precisionRationale = document.querySelector("#precision-rationale");
+const precisionCalories = document.querySelector("#precision-calories");
+const precisionProtein = document.querySelector("#precision-protein");
+const precisionCarbs = document.querySelector("#precision-carbs");
+const precisionVolume = document.querySelector("#precision-volume");
+const precisionRecovery = document.querySelector("#precision-recovery");
+const precisionProgress = document.querySelector("#precision-progress");
 const trainingHeadline = document.querySelector("#training-headline");
 const trainingOverview = document.querySelector("#training-overview");
 const trainingSchedule = document.querySelector("#training-schedule");
@@ -307,6 +315,34 @@ function renderMethods(methods) {
   }
 }
 
+function renderPrecisionPanel(structuredReport, source) {
+  const precision = structuredReport?.precision;
+  const isOnline = source === "deepseek";
+  const hasPrecision = isOnline && precision && (
+    precision.rationale ||
+    precision.calorieTarget ||
+    precision.proteinTarget ||
+    precision.carbPlan ||
+    precision.trainingVolume ||
+    precision.recoveryFocus ||
+    precision.progressChecks?.length
+  );
+
+  precisionPanel.hidden = !hasPrecision;
+
+  if (!hasPrecision) {
+    return;
+  }
+
+  precisionRationale.textContent = precision.rationale;
+  precisionCalories.textContent = precision.calorieTarget;
+  precisionProtein.textContent = precision.proteinTarget;
+  precisionCarbs.textContent = precision.carbPlan;
+  precisionVolume.textContent = precision.trainingVolume;
+  precisionRecovery.textContent = precision.recoveryFocus;
+  renderList(precisionProgress, precision.progressChecks || []);
+}
+
 function renderTrainingPresets(presets) {
   trainingPresets.innerHTML = "";
 
@@ -494,6 +530,7 @@ function renderResult(data) {
   trainingScoreLabel.textContent = `${trainingScore}%`;
 
   renderStructuredReport(structuredReport);
+  renderPrecisionPanel(structuredReport, source);
 
   sourcePill.textContent = sourceMeta.pill;
   sourcePill.classList.toggle("live", sourceMeta.live);
@@ -560,6 +597,7 @@ async function submitProfile(event) {
     setStatus("生成失败，请检查配置后重试。", "error");
     reportSummary.textContent = error.message;
     reportClosing.textContent = "修正 API 配置或稍后重试后，再重新生成报告。";
+    precisionPanel.hidden = true;
     closeNutritionDetail();
     activateReportTab("overview");
   }
