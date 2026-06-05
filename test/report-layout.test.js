@@ -118,11 +118,14 @@ test("deepseek entry is a draggable whale orb before details expand", async () =
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
   const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
   const appJs = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+  const deepseekLogo = await readFile(new URL("../public/assets/deepseek-color.svg", import.meta.url), "utf8");
 
   assert.match(html, /class="hero-grid"[^>]*data-draggable="deepseek-orb"/);
   assert.match(html, /aria-label="展开 DeepSeek 在线能力详情"/);
   assert.match(html, /class="deepseek-orb-icon"/);
-  assert.match(html, /class="deepseek-whale-logo"/);
+  assert.match(html, /class="deepseek-whale-logo"\s+src="\.\/assets\/deepseek-color\.svg"/);
+  assert.match(deepseekLogo, /<title>DeepSeek<\/title>/);
+  assert.match(deepseekLogo, /fill="#4D6BFE"/);
   assert.match(css, /--deepseek-orb-size:\s*76px;/);
   assert.match(css, /\.hero-grid\s*\{[^}]*width:\s*var\(--deepseek-orb-size\);/s);
   assert.match(css, /\.control-panel\.is-collapsed\s*\{[^}]*width:\s*var\(--deepseek-orb-size\);[^}]*height:\s*var\(--deepseek-orb-size\);[^}]*border-radius:\s*var\(--pill\);/s);
@@ -131,7 +134,11 @@ test("deepseek entry is a draggable whale orb before details expand", async () =
   assert.match(css, /\.hero-grid\.is-dragging\s*\{[^}]*transition:\s*none;/s);
   assert.match(appJs, /const heroGrid = document\.querySelector\("\.hero-grid"\);/);
   assert.match(appJs, /function initApiOrbDrag\(\)/);
+  assert.match(appJs, /event\.pointerType === "mouse" && event\.button !== 0/);
   assert.match(appJs, /setPointerCapture\(event\.pointerId\)/);
+  assert.match(appJs, /addEventListener\("touchstart"/);
+  assert.match(appJs, /addEventListener\("touchmove"/);
+  assert.match(appJs, /addEventListener\("touchend"/);
   assert.match(appJs, /addEventListener\("mousedown"/);
   assert.match(appJs, /addEventListener\("mousemove"/);
   assert.match(appJs, /addEventListener\("mouseup"/);

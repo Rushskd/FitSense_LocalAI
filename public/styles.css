@@ -871,41 +871,12 @@ h3 {
 }
 
 .deepseek-whale-logo {
+  display: block;
   width: 33px;
   height: 33px;
-  overflow: visible;
-}
-
-.deepseek-whale-body {
-  fill: rgba(33, 105, 220, 0.9);
-  filter: drop-shadow(0 5px 7px rgba(44, 107, 255, 0.18));
-}
-
-.deepseek-whale-tail,
-.deepseek-whale-wave,
-.deepseek-whale-spark {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.deepseek-whale-tail {
-  stroke: rgba(33, 105, 220, 0.88);
-  stroke-width: 4.6;
-}
-
-.deepseek-whale-wave {
-  stroke: rgba(255, 255, 255, 0.76);
-  stroke-width: 3.8;
-}
-
-.deepseek-whale-spark {
-  stroke: rgba(142, 241, 255, 0.9);
-  stroke-width: 3.2;
-}
-
-.deepseek-whale-eye {
-  fill: #ffffff;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 7px 9px rgba(44, 107, 255, 0.2));
 }
 
 .control-panel.is-open .api-panel-toggle {

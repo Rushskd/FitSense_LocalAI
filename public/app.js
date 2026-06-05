@@ -636,49 +636,28 @@ function initApiOrbDrag() {
 
   let dragState = null;
 
-  const finishDrag = (event) => {
-    if (!dragState) {
-      return;
-    }
+  const isInteractiveTarget = (target) => target.closest("input, textarea, select");
 
-    if (dragState.dragging) {
-      apiOrbWasDragged = true;
-      window.setTimeout(() => {
-        apiOrbWasDragged = false;
-      }, 240);
-    }
-
-    heroGrid.classList.remove("is-dragging");
-    if (Number.isInteger(event.pointerId)) {
-      apiPanelToggle.releasePointerCapture?.(event.pointerId);
-    }
-    dragState = null;
-  };
-
-  apiPanelToggle.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0 || event.target.closest("input, textarea, select")) {
-      return;
-    }
-
+  const startDrag = ({ clientX, clientY, pointerId = null, touchId = null }) => {
     const rect = heroGrid.getBoundingClientRect();
     dragState = {
       dragging: false,
       left: rect.left,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      top: rect.top
+      pointerId,
+      startX: clientX,
+      startY: clientY,
+      top: rect.top,
+      touchId
     };
-    apiPanelToggle.setPointerCapture(event.pointerId);
-  });
+  };
 
-  apiPanelToggle.addEventListener("pointermove", (event) => {
-    if (!dragState || event.pointerId !== dragState.pointerId) {
+  const moveDrag = ({ clientX, clientY, event }) => {
+    if (!dragState) {
       return;
     }
 
-    const dx = event.clientX - dragState.startX;
-    const dy = event.clientY - dragState.startY;
+    const dx = clientX - dragState.startX;
+    const dy = clientY - dragState.startY;
     if (!dragState.dragging && Math.hypot(dx, dy) < 5) {
       return;
     }
@@ -693,47 +672,110 @@ function initApiOrbDrag() {
     heroGrid.style.right = "auto";
     heroGrid.style.bottom = "auto";
     event.preventDefault();
+  };
+
+  const finishDrag = (event) => {
+    if (!dragState) {
+      return;
+    }
+
+    if (dragState.dragging) {
+      apiOrbWasDragged = true;
+      window.setTimeout(() => {
+        apiOrbWasDragged = false;
+      }, 240);
+    }
+
+    heroGrid.classList.remove("is-dragging");
+    if (Number.isInteger(event?.pointerId)) {
+      apiPanelToggle.releasePointerCapture?.(event.pointerId);
+    }
+    dragState = null;
+  };
+
+  apiPanelToggle.addEventListener("pointerdown", (event) => {
+    if ((event.pointerType === "mouse" && event.button !== 0) || dragState || isInteractiveTarget(event.target)) {
+      return;
+    }
+
+    startDrag({
+      clientX: event.clientX,
+      clientY: event.clientY,
+      pointerId: event.pointerId
+    });
+    if (Number.isInteger(event.pointerId)) {
+      apiPanelToggle.setPointerCapture(event.pointerId);
+    }
+  });
+
+  apiPanelToggle.addEventListener("pointermove", (event) => {
+    if (!dragState || event.pointerId !== dragState.pointerId) {
+      return;
+    }
+
+    moveDrag({
+      clientX: event.clientX,
+      clientY: event.clientY,
+      event
+    });
   });
 
   apiPanelToggle.addEventListener("pointerup", finishDrag);
   apiPanelToggle.addEventListener("pointercancel", finishDrag);
 
-  apiPanelToggle.addEventListener("mousedown", (event) => {
-    if (event.button !== 0 || dragState || event.target.closest("input, textarea, select")) {
+  apiPanelToggle.addEventListener("touchstart", (event) => {
+    if (dragState || isInteractiveTarget(event.target)) {
       return;
     }
 
-    const rect = heroGrid.getBoundingClientRect();
-    dragState = {
-      dragging: false,
-      left: rect.left,
-      pointerId: null,
-      startX: event.clientX,
-      startY: event.clientY,
-      top: rect.top
-    };
+    const touch = event.touches[0];
+    if (!touch) {
+      return;
+    }
+
+    startDrag({
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      touchId: touch.identifier
+    });
+  }, { passive: false });
+
+  apiPanelToggle.addEventListener("touchmove", (event) => {
+    if (!dragState) {
+      return;
+    }
+
+    const touch = [...event.touches].find((item) => item.identifier === dragState.touchId) ?? event.touches[0];
+    if (!touch) {
+      return;
+    }
+
+    moveDrag({
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      event
+    });
+  }, { passive: false });
+
+  apiPanelToggle.addEventListener("touchend", finishDrag);
+  apiPanelToggle.addEventListener("touchcancel", finishDrag);
+
+  apiPanelToggle.addEventListener("mousedown", (event) => {
+    if (event.button !== 0 || dragState || isInteractiveTarget(event.target)) {
+      return;
+    }
+
+    startDrag({
+      clientX: event.clientX,
+      clientY: event.clientY
+    });
 
     const handleMouseMove = (moveEvent) => {
-      if (!dragState) {
-        return;
-      }
-
-      const dx = moveEvent.clientX - dragState.startX;
-      const dy = moveEvent.clientY - dragState.startY;
-      if (!dragState.dragging && Math.hypot(dx, dy) < 5) {
-        return;
-      }
-
-      dragState.dragging = true;
-      heroGrid.classList.add("is-dragging");
-      const currentRect = heroGrid.getBoundingClientRect();
-      const maxLeft = Math.max(8, window.innerWidth - currentRect.width - 8);
-      const maxTop = Math.max(8, window.innerHeight - currentRect.height - 8);
-      heroGrid.style.left = `${clampValue(dragState.left + dx, 8, maxLeft)}px`;
-      heroGrid.style.top = `${clampValue(dragState.top + dy, 8, maxTop)}px`;
-      heroGrid.style.right = "auto";
-      heroGrid.style.bottom = "auto";
-      moveEvent.preventDefault();
+      moveDrag({
+        clientX: moveEvent.clientX,
+        clientY: moveEvent.clientY,
+        event: moveEvent
+      });
     };
 
     const handleMouseUp = (upEvent) => {
