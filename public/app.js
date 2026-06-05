@@ -629,6 +629,22 @@ function clampApiOrbToViewport() {
   heroGrid.style.bottom = "auto";
 }
 
+function snapApiOrbToMobileEdge() {
+  if (!heroGrid || !window.matchMedia("(max-width: 720px)").matches) {
+    return;
+  }
+
+  const rect = heroGrid.getBoundingClientRect();
+  const edgeInset = 10;
+  const maxLeft = Math.max(edgeInset, window.innerWidth - rect.width - edgeInset);
+  const maxTop = Math.max(edgeInset, window.innerHeight - rect.height - edgeInset);
+  const shouldSnapLeft = rect.left + rect.width / 2 < window.innerWidth / 2;
+  heroGrid.style.left = `${shouldSnapLeft ? edgeInset : maxLeft}px`;
+  heroGrid.style.top = `${clampValue(rect.top, edgeInset, maxTop)}px`;
+  heroGrid.style.right = "auto";
+  heroGrid.style.bottom = "auto";
+}
+
 function initApiOrbDrag() {
   if (!heroGrid || !apiPanelToggle) {
     return;
@@ -689,6 +705,9 @@ function initApiOrbDrag() {
     heroGrid.classList.remove("is-dragging");
     if (Number.isInteger(event?.pointerId)) {
       apiPanelToggle.releasePointerCapture?.(event.pointerId);
+    }
+    if (dragState.dragging) {
+      snapApiOrbToMobileEdge();
     }
     dragState = null;
   };

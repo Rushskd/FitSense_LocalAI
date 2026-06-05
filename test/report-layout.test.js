@@ -144,3 +144,17 @@ test("deepseek entry is a draggable whale orb before details expand", async () =
   assert.match(appJs, /addEventListener\("mouseup"/);
   assert.match(appJs, /apiOrbWasDragged/);
 });
+
+test("mobile deepseek orb removes square backing, snaps to edges, and opens smoothly", async () => {
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+  const appJs = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.control-panel\.is-collapsed\s*\{[^}]*padding:\s*0;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*backdrop-filter:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.control-panel\.is-collapsed\s+\.api-panel-toggle\s*\{[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*backdrop-filter:\s*none;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.deepseek-orb-icon\s*\{[^}]*overflow:\s*hidden;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.api-panel-body\s*\{[^}]*animation:\s*apiPanelReveal 220ms/);
+  assert.match(css, /@keyframes apiPanelReveal\s*\{[^}]*opacity:\s*0;[^}]*transform:\s*translate3d\(0,\s*6px,\s*0\)\s*scale\(0\.98\);/s);
+  assert.match(appJs, /function snapApiOrbToMobileEdge\(\)/);
+  assert.match(appJs, /window\.matchMedia\("\(max-width:\s*720px\)"\)\.matches/);
+  assert.match(appJs, /snapApiOrbToMobileEdge\(\);/);
+});

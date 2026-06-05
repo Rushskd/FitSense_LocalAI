@@ -605,6 +605,8 @@ h3 {
   margin-bottom: 0;
   isolation: isolate;
   transition:
+    left 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    top 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
     width 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
     transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -993,7 +995,9 @@ h3 {
   gap: 8px;
   width: auto;
   margin-top: 8px;
-  animation: panelIn 320ms ease both;
+  transform-origin: top right;
+  will-change: opacity, transform;
+  animation: apiPanelReveal 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .api-panel-body[hidden] {
@@ -1903,6 +1907,18 @@ h3 {
   }
 }
 
+@keyframes apiPanelReveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 @keyframes cardRise {
   from {
     opacity: 0;
@@ -2137,6 +2153,35 @@ h3 {
     transform: translateZ(0);
   }
 
+  .control-panel.is-collapsed {
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: transparent;
+    overflow: visible;
+  }
+
+  .control-panel.is-collapsed::before,
+  .control-panel.is-collapsed::after,
+  .control-panel.is-collapsed .api-panel-toggle::before,
+  .control-panel.is-collapsed .api-panel-toggle::after {
+    display: none;
+  }
+
+  .control-panel.is-collapsed .api-panel-toggle {
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    overflow: visible;
+  }
+
+  .deepseek-orb-icon {
+    overflow: hidden;
+  }
+
   .hero-grid:has(.control-panel.is-open) {
     width: min(332px, calc(100vw - 20px));
   }
@@ -2145,6 +2190,7 @@ h3 {
     position: static;
     width: auto;
     margin-top: 14px;
+    animation: apiPanelReveal 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 
   .hero-spectrum {
