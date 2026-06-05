@@ -113,3 +113,27 @@ test("mobile keeps the glass look with cheaper scrolling effects", async () => {
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.liquidGlass-effect\s*\{[^}]*filter:\s*none;/);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.hero-grid\s*\{[^}]*contain:\s*layout paint style;/);
 });
+
+test("deepseek entry is a draggable whale orb before details expand", async () => {
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+  const appJs = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(html, /class="hero-grid"[^>]*data-draggable="deepseek-orb"/);
+  assert.match(html, /aria-label="展开 DeepSeek 在线能力详情"/);
+  assert.match(html, /class="deepseek-orb-icon"/);
+  assert.match(html, /class="deepseek-whale-logo"/);
+  assert.match(css, /--deepseek-orb-size:\s*76px;/);
+  assert.match(css, /\.hero-grid\s*\{[^}]*width:\s*var\(--deepseek-orb-size\);/s);
+  assert.match(css, /\.control-panel\.is-collapsed\s*\{[^}]*width:\s*var\(--deepseek-orb-size\);[^}]*height:\s*var\(--deepseek-orb-size\);[^}]*border-radius:\s*var\(--pill\);/s);
+  assert.match(css, /\.control-panel\.is-collapsed\s+\.status-head\s*\{[^}]*opacity:\s*0;/s);
+  assert.match(css, /\.api-panel-toggle\s*\{[^}]*touch-action:\s*none;/s);
+  assert.match(css, /\.hero-grid\.is-dragging\s*\{[^}]*transition:\s*none;/s);
+  assert.match(appJs, /const heroGrid = document\.querySelector\("\.hero-grid"\);/);
+  assert.match(appJs, /function initApiOrbDrag\(\)/);
+  assert.match(appJs, /setPointerCapture\(event\.pointerId\)/);
+  assert.match(appJs, /addEventListener\("mousedown"/);
+  assert.match(appJs, /addEventListener\("mousemove"/);
+  assert.match(appJs, /addEventListener\("mouseup"/);
+  assert.match(appJs, /apiOrbWasDragged/);
+});

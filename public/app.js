@@ -16,6 +16,7 @@ const apiKeyStatus = document.querySelector("#api-key-status");
 const apiBadge = document.querySelector("#api-badge");
 const apiPanelToggle = document.querySelector("#api-panel-toggle");
 const apiPanelBody = document.querySelector("#api-panel-body");
+const heroGrid = document.querySelector(".hero-grid");
 const modelName = document.querySelector("#model-name");
 const apiDetail = document.querySelector("#api-detail");
 const sourcePill = document.querySelector("#source-pill");
@@ -59,6 +60,7 @@ const reportTabs = Array.from(document.querySelectorAll("[data-report-tab]"));
 const reportPanels = Array.from(document.querySelectorAll("[data-report-panel]"));
 const reportTabsContainer = document.querySelector(".report-tabs");
 const reportTabLens = document.querySelector(".report-tab-lens");
+let apiOrbWasDragged = false;
 
 const detailView = document.querySelector("#nutrition-detail-view");
 const detailTitle = document.querySelector("#detail-title");
@@ -609,6 +611,142 @@ function handleDetailKeydown(event) {
   }
 }
 
+function clampValue(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function clampApiOrbToViewport() {
+  if (!heroGrid || !heroGrid.style.left || !heroGrid.style.top) {
+    return;
+  }
+
+  const rect = heroGrid.getBoundingClientRect();
+  const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+  const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+  heroGrid.style.left = `${clampValue(rect.left, 8, maxLeft)}px`;
+  heroGrid.style.top = `${clampValue(rect.top, 8, maxTop)}px`;
+  heroGrid.style.right = "auto";
+  heroGrid.style.bottom = "auto";
+}
+
+function initApiOrbDrag() {
+  if (!heroGrid || !apiPanelToggle) {
+    return;
+  }
+
+  let dragState = null;
+
+  const finishDrag = (event) => {
+    if (!dragState) {
+      return;
+    }
+
+    if (dragState.dragging) {
+      apiOrbWasDragged = true;
+      window.setTimeout(() => {
+        apiOrbWasDragged = false;
+      }, 240);
+    }
+
+    heroGrid.classList.remove("is-dragging");
+    if (Number.isInteger(event.pointerId)) {
+      apiPanelToggle.releasePointerCapture?.(event.pointerId);
+    }
+    dragState = null;
+  };
+
+  apiPanelToggle.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || event.target.closest("input, textarea, select")) {
+      return;
+    }
+
+    const rect = heroGrid.getBoundingClientRect();
+    dragState = {
+      dragging: false,
+      left: rect.left,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      top: rect.top
+    };
+    apiPanelToggle.setPointerCapture(event.pointerId);
+  });
+
+  apiPanelToggle.addEventListener("pointermove", (event) => {
+    if (!dragState || event.pointerId !== dragState.pointerId) {
+      return;
+    }
+
+    const dx = event.clientX - dragState.startX;
+    const dy = event.clientY - dragState.startY;
+    if (!dragState.dragging && Math.hypot(dx, dy) < 5) {
+      return;
+    }
+
+    dragState.dragging = true;
+    heroGrid.classList.add("is-dragging");
+    const rect = heroGrid.getBoundingClientRect();
+    const maxLeft = Math.max(8, window.innerWidth - rect.width - 8);
+    const maxTop = Math.max(8, window.innerHeight - rect.height - 8);
+    heroGrid.style.left = `${clampValue(dragState.left + dx, 8, maxLeft)}px`;
+    heroGrid.style.top = `${clampValue(dragState.top + dy, 8, maxTop)}px`;
+    heroGrid.style.right = "auto";
+    heroGrid.style.bottom = "auto";
+    event.preventDefault();
+  });
+
+  apiPanelToggle.addEventListener("pointerup", finishDrag);
+  apiPanelToggle.addEventListener("pointercancel", finishDrag);
+
+  apiPanelToggle.addEventListener("mousedown", (event) => {
+    if (event.button !== 0 || dragState || event.target.closest("input, textarea, select")) {
+      return;
+    }
+
+    const rect = heroGrid.getBoundingClientRect();
+    dragState = {
+      dragging: false,
+      left: rect.left,
+      pointerId: null,
+      startX: event.clientX,
+      startY: event.clientY,
+      top: rect.top
+    };
+
+    const handleMouseMove = (moveEvent) => {
+      if (!dragState) {
+        return;
+      }
+
+      const dx = moveEvent.clientX - dragState.startX;
+      const dy = moveEvent.clientY - dragState.startY;
+      if (!dragState.dragging && Math.hypot(dx, dy) < 5) {
+        return;
+      }
+
+      dragState.dragging = true;
+      heroGrid.classList.add("is-dragging");
+      const currentRect = heroGrid.getBoundingClientRect();
+      const maxLeft = Math.max(8, window.innerWidth - currentRect.width - 8);
+      const maxTop = Math.max(8, window.innerHeight - currentRect.height - 8);
+      heroGrid.style.left = `${clampValue(dragState.left + dx, 8, maxLeft)}px`;
+      heroGrid.style.top = `${clampValue(dragState.top + dy, 8, maxTop)}px`;
+      heroGrid.style.right = "auto";
+      heroGrid.style.bottom = "auto";
+      moveEvent.preventDefault();
+    };
+
+    const handleMouseUp = (upEvent) => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      finishDrag(upEvent);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp, { once: true });
+  });
+  window.addEventListener("resize", clampApiOrbToViewport);
+}
+
 function toggleApiPanel() {
   if (!apiPanelToggle || !apiPanelBody) {
     return;
@@ -617,16 +755,29 @@ function toggleApiPanel() {
   const expanded = apiPanelToggle.getAttribute("aria-expanded") === "true";
   const nextExpanded = !expanded;
   apiPanelToggle.setAttribute("aria-expanded", String(nextExpanded));
+  apiPanelToggle.setAttribute("aria-label", nextExpanded ? "收起 DeepSeek 在线能力详情" : "展开 DeepSeek 在线能力详情");
   apiPanelBody.hidden = !nextExpanded;
   apiPanelToggle.querySelector(".api-toggle-hint").textContent = nextExpanded ? "点击收起" : "点击展开";
   apiPanelToggle.closest(".control-panel")?.classList.toggle("is-open", nextExpanded);
   apiPanelToggle.closest(".control-panel")?.classList.toggle("is-collapsed", !nextExpanded);
+  requestAnimationFrame(clampApiOrbToViewport);
+}
+
+function handleApiPanelToggleClick(event) {
+  if (apiOrbWasDragged) {
+    event.preventDefault();
+    apiOrbWasDragged = false;
+    return;
+  }
+
+  toggleApiPanel();
 }
 
 apiKeyInput.value = localApiConfig.apiKey;
 initReportTabLiquid();
+initApiOrbDrag();
 loadApiStatus();
-apiPanelToggle?.addEventListener("click", toggleApiPanel);
+apiPanelToggle?.addEventListener("click", handleApiPanelToggleClick);
 apiConfigForm.addEventListener("submit", saveApiKey);
 clearApiKeyButton.addEventListener("click", clearApiKey);
 form.addEventListener("submit", submitProfile);

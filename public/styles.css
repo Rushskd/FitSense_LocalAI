@@ -44,6 +44,7 @@
   --radius-md: 24px;
   --radius-sm: 18px;
   --pill: 999px;
+  --deepseek-orb-size: 76px;
   --accent: #2c6bff;
   --accent-2: #6ca7ff;
   --accent-3: #8df1ff;
@@ -600,12 +601,21 @@ h3 {
   right: clamp(16px, 3vw, 34px);
   bottom: clamp(16px, 3vw, 28px);
   z-index: 40;
-  width: min(304px, calc(100vw - 32px));
+  width: var(--deepseek-orb-size);
   margin-bottom: 0;
   isolation: isolate;
   transition:
     width 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
     transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.hero-grid.is-dragging {
+  transition: none;
+}
+
+.hero-grid.is-dragging .control-panel,
+.hero-grid.is-dragging .api-panel-toggle {
+  cursor: grabbing;
 }
 
 .hero-grid:has(.control-panel.is-open) {
@@ -630,6 +640,14 @@ h3 {
     opacity 360ms ease,
     filter 360ms ease,
     transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.hero-grid:not(:has(.control-panel.is-open))::before {
+  inset: -16px;
+  border-radius: var(--pill);
+  opacity: 0.44;
+  filter: blur(14px) saturate(145%);
+  transform: scale(0.98);
 }
 
 .hero-grid:has(.control-panel.is-open)::before {
@@ -795,8 +813,10 @@ h3 {
 
 .control-panel.is-collapsed {
   padding: 6px;
-  max-width: 320px;
-  border-radius: 28px;
+  width: var(--deepseek-orb-size);
+  height: var(--deepseek-orb-size);
+  max-width: var(--deepseek-orb-size);
+  border-radius: var(--pill);
 }
 
 .control-card,
@@ -822,6 +842,11 @@ h3 {
   color: var(--ink);
   text-align: left;
   cursor: pointer;
+  display: grid;
+  gap: 8px;
+  position: relative;
+  touch-action: none;
+  user-select: none;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.2)),
     rgba(255, 255, 255, 0.18);
@@ -831,14 +856,102 @@ h3 {
     border-radius 360ms cubic-bezier(0.175, 0.885, 0.32, 2.2);
 }
 
+.deepseek-orb-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--pill);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.95), transparent 42%),
+    linear-gradient(135deg, rgba(114, 214, 255, 0.7), rgba(47, 117, 255, 0.28) 58%, rgba(255, 255, 255, 0.32));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 12px 22px rgba(45, 103, 194, 0.16);
+}
+
+.deepseek-whale-logo {
+  width: 33px;
+  height: 33px;
+  overflow: visible;
+}
+
+.deepseek-whale-body {
+  fill: rgba(33, 105, 220, 0.9);
+  filter: drop-shadow(0 5px 7px rgba(44, 107, 255, 0.18));
+}
+
+.deepseek-whale-tail,
+.deepseek-whale-wave,
+.deepseek-whale-spark {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.deepseek-whale-tail {
+  stroke: rgba(33, 105, 220, 0.88);
+  stroke-width: 4.6;
+}
+
+.deepseek-whale-wave {
+  stroke: rgba(255, 255, 255, 0.76);
+  stroke-width: 3.8;
+}
+
+.deepseek-whale-spark {
+  stroke: rgba(142, 241, 255, 0.9);
+  stroke-width: 3.2;
+}
+
+.deepseek-whale-eye {
+  fill: #ffffff;
+}
+
 .control-panel.is-open .api-panel-toggle {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
   padding: 10px 12px;
   border-radius: 22px;
 }
 
 .control-panel.is-collapsed .api-panel-toggle {
-  padding: 10px 12px;
-  border-radius: 20px;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  padding: 0;
+  border-radius: var(--pill);
+}
+
+.control-panel.is-collapsed .deepseek-orb-icon {
+  width: 54px;
+  height: 54px;
+}
+
+.control-panel.is-collapsed .deepseek-whale-logo {
+  width: 41px;
+  height: 41px;
+}
+
+.control-panel.is-collapsed .status-head {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.control-panel.is-collapsed .api-toggle-hint {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.control-panel.is-open .status-head {
+  min-width: 0;
+}
+
+.control-panel.is-open .api-toggle-hint {
+  grid-column: 1 / -1;
 }
 
 .control-panel.is-open .panel-label {
@@ -2047,10 +2160,14 @@ h3 {
     position: fixed;
     right: 10px;
     bottom: calc(10px + env(safe-area-inset-bottom));
-    width: min(332px, calc(100vw - 20px));
+    width: var(--deepseek-orb-size);
     margin-bottom: 0;
     contain: layout paint style;
     transform: translateZ(0);
+  }
+
+  .hero-grid:has(.control-panel.is-open) {
+    width: min(332px, calc(100vw - 20px));
   }
 
   .api-panel-body {
