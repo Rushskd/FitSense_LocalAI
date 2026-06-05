@@ -172,7 +172,7 @@ test("report tabs and data cards keep breathable spacing without heavy backdrop 
   assert.doesNotMatch(css, /rgba\(35,\s*53,\s*83,\s*0\.58\)/);
   assert.match(css, /\.report-panel\s*\{[^}]*margin-top:\s*64px;/s);
   assert.match(css, /\.report-panel\s+\.summary-band\s*\+\s*\.overview-grid\s*\{[^}]*margin-top:\s*58px;/s);
-  assert.match(css, /\.preset-grid\s*\{[^}]*margin-top:\s*32px;/s);
+  assert.match(css, /\.preset-grid\s*\{[^}]*margin-top:\s*40px;/s);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-tab\s*\{[^}]*min-height:\s*46px;[^}]*padding:\s*12px 20px;/);
   assert.match(css, /@media \(max-width:\s*520px\)\s*\{[\s\S]*\.report-tab\s*\{[^}]*padding-inline:\s*20px;/);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-panel\s*\{[^}]*margin-top:\s*44px;/);
@@ -187,4 +187,17 @@ test("report surfaces glow in place on hover instead of lifting from the backdro
   assert.match(css, /\.summary-band:hover,\s*\.overview-card:hover,\s*\.module-card:hover,\s*\.preset-card:hover,\s*\.method-card:hover,\s*\.report-box:hover\s*\{[^}]*transform:\s*none;[^}]*box-shadow:/s);
   assert.doesNotMatch(css, /\.report-tab:hover\s*\{[^}]*translateY/s);
   assert.doesNotMatch(css, /\.summary-band:hover,\s*\.overview-card:hover,\s*\.module-card:hover,\s*\.preset-card:hover,\s*\.method-card:hover,\s*\.report-box:hover\s*\{[^}]*translateY/s);
+});
+
+test("detail report tabs keep generous vertical rhythm between card groups", async () => {
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.preset-grid\s*\{[^}]*gap:\s*30px;[^}]*margin-top:\s*40px;/s);
+  assert.match(css, /\.preset-grid\s*\+\s*\.training-detail-grid\s*\{[^}]*margin-top:\s*58px;/s);
+  assert.match(css, /\.module-card-wide\s*>\s*\.module-copy\s*\+\s*\.detail-block\s*\{[^}]*margin-top:\s*38px;/s);
+  assert.match(css, /\.module-card-wide\s*>\s*\.detail-block\s*\+\s*\.detail-block\s*\{[^}]*margin-top:\s*46px;/s);
+  assert.match(css, /\.method-grid\s*\{[^}]*gap:\s*30px;[^}]*margin-top:\s*28px;/s);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.preset-grid\s*\{[^}]*gap:\s*26px;[^}]*margin-top:\s*30px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.preset-grid\s*\+\s*\.training-detail-grid\s*\{[^}]*margin-top:\s*36px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.method-grid\s*\{[^}]*gap:\s*24px;[^}]*margin-top:\s*22px;/);
 });
