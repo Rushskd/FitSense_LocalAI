@@ -179,3 +179,12 @@ test("report tabs and data cards keep breathable spacing without heavy backdrop 
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-panel\s+\.summary-band\s*\+\s*\.overview-grid\s*\{[^}]*margin-top:\s*36px;/);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.overview-grid,\s*\.training-detail-grid\s*\{[^}]*gap:\s*30px;/);
 });
+
+test("report surfaces glow in place on hover instead of lifting from the backdrop", async () => {
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.report-tab:hover\s*\{[^}]*transform:\s*none;[^}]*box-shadow:/s);
+  assert.match(css, /\.summary-band:hover,\s*\.overview-card:hover,\s*\.module-card:hover,\s*\.preset-card:hover,\s*\.method-card:hover,\s*\.report-box:hover\s*\{[^}]*transform:\s*none;[^}]*box-shadow:/s);
+  assert.doesNotMatch(css, /\.report-tab:hover\s*\{[^}]*translateY/s);
+  assert.doesNotMatch(css, /\.summary-band:hover,\s*\.overview-card:hover,\s*\.module-card:hover,\s*\.preset-card:hover,\s*\.method-card:hover,\s*\.report-box:hover\s*\{[^}]*translateY/s);
+});
