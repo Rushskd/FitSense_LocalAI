@@ -118,8 +118,15 @@ test("buildDeepSeekRequestBody requests structured json and gradual carb reducti
   assert.match(body.messages[1].content, /只返回一个合法 JSON 对象/);
   assert.match(body.messages[1].content, /碳水渐降/);
   assert.match(body.messages[1].content, /生酮不是默认推荐/);
+  assert.match(body.messages[1].content, /Mifflin-St Jeor/);
+  assert.match(body.messages[1].content, /TDEE/);
+  assert.match(body.messages[1].content, /至少给出 4 条/);
+  assert.match(body.messages[0].content, /资深中文健身教练/);
   assert.match(body.messages[1].content, /presets/);
   assert.match(body.messages[1].content, /性别: 男/);
+  assert.deepEqual(body.response_format, { type: "json_object" });
+  assert.equal(body.max_tokens, 1800);
+  assert.equal(body.temperature, 0.45);
 });
 
 test("parseStructuredReport keeps valid sections from ai output", () => {
@@ -160,6 +167,34 @@ test("parseStructuredReport keeps valid sections from ai output", () => {
   assert.equal(structured.training.presets[0].name, "三练基础版");
   assert.equal(structured.nutrition.strategy, "中低碳高蛋白");
   assert.equal(structured.nutrition.methods[0].name, "碳水渐降");
+});
+
+test("parseStructuredReport keeps up to five action items from ai output", () => {
+  const structured = parseStructuredReport(
+    JSON.stringify({
+      summary: "更详细的总结",
+      training: {
+        headline: "训练主线",
+        overview: "训练总述",
+        schedule: ["周一", "周二", "周三", "周四", "周五", "周六"],
+        actions: ["动作 1", "动作 2", "动作 3", "动作 4", "动作 5", "动作 6"],
+        presets: fallbackPlan.training.presets
+      },
+      nutrition: {
+        strategy: "碳水渐降",
+        overview: "饮食总述",
+        actions: ["饮食 1", "饮食 2", "饮食 3", "饮食 4", "饮食 5", "饮食 6"],
+        methods: fallbackPlan.nutrition.methods,
+        caution: "边界提醒"
+      },
+      closing: "收尾"
+    }),
+    fallbackPlan
+  );
+
+  assert.equal(structured.training.schedule.length, 5);
+  assert.equal(structured.training.actions.length, 5);
+  assert.equal(structured.nutrition.actions.length, 5);
 });
 
 test("parseStructuredReport falls back when ai output is not valid json", () => {
