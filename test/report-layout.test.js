@@ -29,13 +29,13 @@ test("hero api entry and report spacing follow the annotated layout", async () =
   assert.ok(heroStart > mastheadEnd);
   assert.match(css, /\.hero-grid\s*\{[^}]*position:\s*fixed;[^}]*right:\s*clamp\(16px,\s*3vw,\s*34px\);[^}]*bottom:\s*clamp\(16px,\s*3vw,\s*28px\);/s);
   assert.doesNotMatch(css, /\.hero-grid\s*\{[^}]*top:\s*260px;/s);
-  assert.match(css, /\.report-tabs\s*\{[^}]*gap:\s*16px;/s);
-  assert.match(css, /\.report-tab\s*\{[^}]*padding:\s*13px 24px;/s);
-  assert.match(css, /\.report-panel\s*\{[^}]*margin-top:\s*56px;/s);
-  assert.match(css, /\.overview-grid,\s*\.training-detail-grid\s*\{[^}]*gap:\s*50px;/s);
+  assert.match(css, /\.report-tabs\s*\{[^}]*gap:\s*18px;/s);
+  assert.match(css, /\.report-tab\s*\{[^}]*min-height:\s*50px;[^}]*padding:\s*15px 26px;/s);
+  assert.match(css, /\.report-panel\s*\{[^}]*margin-top:\s*64px;/s);
+  assert.match(css, /\.overview-grid,\s*\.training-detail-grid\s*\{[^}]*gap:\s*54px;/s);
   assert.doesNotMatch(css, /\.masthead:has\(\.control-panel\.is-open\)/);
   assert.match(css, /\.hero-grid:has\(\.control-panel\.is-open\)\s*\{[^}]*width:\s*min\(340px,\s*calc\(100vw - 32px\)\);/s);
-  assert.match(css, /\.hero-grid:has\(\.control-panel\.is-open\)::before\s*\{[^}]*opacity:\s*0\.82;[^}]*filter:\s*blur\(34px\) saturate\(190%\);[^}]*animation:\s*floatingHalo/s);
+  assert.doesNotMatch(css, /\.hero-grid:has\(\.control-panel\.is-open\)::before\s*\{[^}]*animation:\s*floatingHalo/s);
   assert.match(css, /\.api-panel-body\s*\{[^}]*position:\s*static;[^}]*margin-top:\s*8px;/s);
   assert.doesNotMatch(css, /\.api-panel-body\s*\{[^}]*position:\s*absolute;/s);
 });
@@ -152,9 +152,26 @@ test("mobile deepseek orb removes square backing, snaps to edges, and opens smoo
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.control-panel\.is-collapsed\s*\{[^}]*padding:\s*0;[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*backdrop-filter:\s*none;/);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.control-panel\.is-collapsed\s+\.api-panel-toggle\s*\{[^}]*background:\s*transparent;[^}]*box-shadow:\s*none;[^}]*backdrop-filter:\s*none;/);
   assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.deepseek-orb-icon\s*\{[^}]*overflow:\s*hidden;/);
-  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.api-panel-body\s*\{[^}]*animation:\s*apiPanelReveal 220ms/);
-  assert.match(css, /@keyframes apiPanelReveal\s*\{[^}]*opacity:\s*0;[^}]*transform:\s*translate3d\(0,\s*6px,\s*0\)\s*scale\(0\.98\);/s);
+  assert.match(css, /\.api-panel-body\s*\{[^}]*animation:\s*apiPanelFade 140ms ease both;/s);
+  assert.match(css, /@keyframes apiPanelFade\s*\{[\s\S]*opacity:\s*0;[\s\S]*opacity:\s*1;/);
+  assert.doesNotMatch(css, /apiPanelReveal/);
   assert.match(appJs, /function snapApiOrbToMobileEdge\(\)/);
   assert.match(appJs, /window\.matchMedia\("\(max-width:\s*720px\)"\)\.matches/);
   assert.match(appJs, /snapApiOrbToMobileEdge\(\);/);
+  assert.match(appJs, /let apiOrbTouchTapHandled = false;/);
+  assert.match(appJs, /function handleApiOrbTouchEnd/);
+});
+
+test("report tabs and data cards keep breathable spacing without heavy backdrop blocks", async () => {
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.report-card::before,\s*\.report-card::after\s*\{[^}]*display:\s*none;/s);
+  assert.match(css, /\.report-panel\s*\{[^}]*margin-top:\s*64px;/s);
+  assert.match(css, /\.report-panel\s+\.summary-band\s*\+\s*\.overview-grid\s*\{[^}]*margin-top:\s*58px;/s);
+  assert.match(css, /\.preset-grid\s*\{[^}]*margin-top:\s*32px;/s);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-tab\s*\{[^}]*min-height:\s*46px;[^}]*padding:\s*12px 20px;/);
+  assert.match(css, /@media \(max-width:\s*520px\)\s*\{[\s\S]*\.report-tab\s*\{[^}]*padding-inline:\s*20px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-panel\s*\{[^}]*margin-top:\s*44px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.report-panel\s+\.summary-band\s*\+\s*\.overview-grid\s*\{[^}]*margin-top:\s*36px;/);
+  assert.match(css, /@media \(max-width:\s*720px\)\s*\{[\s\S]*\.overview-grid,\s*\.training-detail-grid\s*\{[^}]*gap:\s*30px;/);
 });

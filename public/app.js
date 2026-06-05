@@ -61,6 +61,7 @@ const reportPanels = Array.from(document.querySelectorAll("[data-report-panel]")
 const reportTabsContainer = document.querySelector(".report-tabs");
 const reportTabLens = document.querySelector(".report-tab-lens");
 let apiOrbWasDragged = false;
+let apiOrbTouchTapHandled = false;
 
 const detailView = document.querySelector("#nutrition-detail-view");
 const detailTitle = document.querySelector("#detail-title");
@@ -776,7 +777,22 @@ function initApiOrbDrag() {
     });
   }, { passive: false });
 
-  apiPanelToggle.addEventListener("touchend", finishDrag);
+  function handleApiOrbTouchEnd(event) {
+    if (dragState && !dragState.dragging) {
+      event.preventDefault();
+      finishDrag(event);
+      apiOrbTouchTapHandled = true;
+      toggleApiPanel();
+      window.setTimeout(() => {
+        apiOrbTouchTapHandled = false;
+      }, 260);
+      return;
+    }
+
+    finishDrag(event);
+  }
+
+  apiPanelToggle.addEventListener("touchend", handleApiOrbTouchEnd);
   apiPanelToggle.addEventListener("touchcancel", finishDrag);
 
   apiPanelToggle.addEventListener("mousedown", (event) => {
@@ -825,6 +841,12 @@ function toggleApiPanel() {
 }
 
 function handleApiPanelToggleClick(event) {
+  if (apiOrbTouchTapHandled) {
+    event.preventDefault();
+    apiOrbTouchTapHandled = false;
+    return;
+  }
+
   if (apiOrbWasDragged) {
     event.preventDefault();
     apiOrbWasDragged = false;
