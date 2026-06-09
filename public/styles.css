@@ -262,7 +262,7 @@ button {
 
 @media (min-width: 901px) {
   .intro-copy {
-    --intro-copy-offset: clamp(-34px, -2.8vw, -18px);
+    --intro-copy-offset: clamp(-24px, -2vw, -12px);
     justify-self: start;
   }
 }

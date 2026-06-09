@@ -567,7 +567,7 @@ function initFlowingPointsBackground() {
     const points = [];
     const sampleStep = state.width > 1360 ? 8 : 10;
     const logoCenterX = state.width * 0.77;
-    const logoCenterY = state.height * 0.36;
+    const logoCenterY = state.height * 0.41;
     const startX = logoCenterX - sampleCanvas.width / 2;
     const startY = logoCenterY - sampleCanvas.height / 2;
 

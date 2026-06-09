@@ -36,7 +36,7 @@ test("homepage opens with a fullpage parallax intro before the workspace", async
   assert.match(css, /\.fullpage-section\s*\{[^}]*min-height:\s*100svh;[^}]*scroll-snap-align:\s*start;/s);
   assert.match(css, /\.intro-section\s*\{[^}]*overflow:\s*hidden;/s);
   assert.match(css, /\.intro-copy\s*\{[^}]*--intro-copy-offset:\s*0px;[^}]*transform:\s*translate3d\(var\(--intro-copy-offset\),\s*0,\s*0\);/s);
-  assert.match(css, /@media \(min-width:\s*901px\)\s*\{[\s\S]*\.intro-copy\s*\{[^}]*--intro-copy-offset:\s*clamp\(-34px,\s*-2\.8vw,\s*-18px\);[^}]*justify-self:\s*start;/);
+  assert.match(css, /@media \(min-width:\s*901px\)\s*\{[\s\S]*\.intro-copy\s*\{[^}]*--intro-copy-offset:\s*clamp\(-24px,\s*-2vw,\s*-12px\);[^}]*justify-self:\s*start;/);
   assert.match(css, /\.intro-parallax\s*\{[^}]*transform:/s);
   assert.match(css, /\.workspace-section\s*\{[^}]*padding:\s*28px 0 52px;/s);
   assert.match(appJs, /const introSection = document\.querySelector\("#intro-section"\);/);
@@ -74,7 +74,7 @@ test("desktop intro owns the flowing point logo without leaking into workspace",
   assert.match(appJs, /const imageScale = Math\.min\(1\.5,\s*Math\.max\(1\.08,\s*state\.width \/ 1400\)\);/);
   assert.match(appJs, /const targetWidth = Math\.min\(500,\s*Math\.max\(340,\s*state\.width \* 0\.3\)\) \* imageScale;/);
   assert.match(appJs, /const logoCenterX = state\.width \* 0\.77;/);
-  assert.match(appJs, /const logoCenterY = state\.height \* 0\.36;/);
+  assert.match(appJs, /const logoCenterY = state\.height \* 0\.41;/);
   assert.match(appJs, /function updateFullpageParallax\(\)/);
   assert.match(appJs, /window\.addEventListener\("scroll", updateFullpageParallax,\s*\{\s*passive:\s*true\s*\}\);/s);
 });
