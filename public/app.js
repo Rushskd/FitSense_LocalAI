@@ -550,8 +550,8 @@ function initFlowingPointsBackground() {
       return;
     }
 
-    const imageScale = Math.min(1.46, Math.max(1.04, state.width / 1440));
-    const targetWidth = Math.min(460, Math.max(310, state.width * 0.28)) * imageScale;
+    const imageScale = Math.min(1.5, Math.max(1.08, state.width / 1400));
+    const targetWidth = Math.min(500, Math.max(340, state.width * 0.3)) * imageScale;
     const targetHeight = targetWidth * (state.image.naturalHeight / state.image.naturalWidth);
     const sampleCanvas = document.createElement("canvas");
     const sampleContext = sampleCanvas.getContext("2d", { willReadFrequently: true });
@@ -566,8 +566,8 @@ function initFlowingPointsBackground() {
     const imageData = sampleContext.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height);
     const points = [];
     const sampleStep = state.width > 1360 ? 8 : 10;
-    const logoCenterX = state.width * 0.82;
-    const logoCenterY = state.height * 0.31;
+    const logoCenterX = state.width * 0.77;
+    const logoCenterY = state.height * 0.36;
     const startX = logoCenterX - sampleCanvas.width / 2;
     const startY = logoCenterY - sampleCanvas.height / 2;
 
