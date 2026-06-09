@@ -116,11 +116,47 @@ button {
   scroll-snap-type: y mandatory;
 }
 
+.intro-section .flowing-points-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: var(--particle-opacity, 0.78);
+  mix-blend-mode: screen;
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease;
+}
+
+.background-depth-bridge {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: min(1180px, 92vw);
+  height: min(680px, 74vh);
+  pointer-events: none;
+  border-radius: 48px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(141, 241, 255, 0.18), transparent 34%),
+    radial-gradient(circle at 82% 58%, rgba(243, 165, 106, 0.14), transparent 32%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 30% 70%, rgba(255, 255, 255, 0.1)),
+    repeating-linear-gradient(135deg, rgba(141, 241, 255, 0.12) 0 1px, transparent 1px 42px);
+  opacity: var(--bridge-opacity, 0.34);
+  filter: blur(0.2px) saturate(132%);
+  transform: translate3d(0, var(--bridge-shift, 0px), 0);
+  translate: -50% -50%;
+  mask-image: radial-gradient(ellipse at center, #000 0 44%, transparent 78%);
+}
+
 .fullpage-section {
   min-height: 100svh;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   position: relative;
+  z-index: 2;
 }
 
 .workspace-section {
@@ -219,7 +255,7 @@ button {
 .intro-copy {
   width: min(1020px, 100%);
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .intro-kicker,
@@ -304,6 +340,7 @@ button {
 
 .intro-dashboard {
   position: absolute;
+  z-index: 3;
   right: clamp(18px, 6vw, 88px);
   bottom: clamp(76px, 11vw, 132px);
   display: grid;
@@ -350,6 +387,7 @@ button {
 
 .intro-scroll-cue {
   position: absolute;
+  z-index: 3;
   left: 50%;
   bottom: 26px;
   display: inline-flex;
@@ -432,7 +470,7 @@ button {
   width: min(1260px, calc(100% - 32px));
   margin: 0 auto;
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .glass-panel,
@@ -2353,6 +2391,17 @@ h3 {
   }
 }
 
+@media (max-width: 900px) {
+  .flowing-points-canvas {
+    display: none;
+  }
+
+  .background-depth-bridge {
+    opacity: 0.16;
+    filter: blur(2px) saturate(112%);
+  }
+}
+
 @media (max-width: 720px) {
   :root {
     --font-display: "PingFang SC", "Microsoft YaHei UI", "Noto Sans SC", sans-serif;
@@ -2904,5 +2953,13 @@ h3 {
   .intro-parallax,
   .intro-enter {
     transition: none;
+  }
+
+  .flowing-points-canvas {
+    display: none;
+  }
+
+  .background-depth-bridge {
+    opacity: 0.14;
   }
 }

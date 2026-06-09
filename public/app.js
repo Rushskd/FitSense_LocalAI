@@ -20,6 +20,7 @@ const heroGrid = document.querySelector(".hero-grid");
 const introSection = document.querySelector("#intro-section");
 const workspaceSection = document.querySelector("#workspace-section");
 const introEnterButton = document.querySelector("#intro-enter");
+const flowingPointsCanvas = document.querySelector("#flowing-points-canvas");
 const modelName = document.querySelector("#model-name");
 const apiDetail = document.querySelector("#api-detail");
 const sourcePill = document.querySelector("#source-pill");
@@ -88,6 +89,7 @@ let serverConfig = {
 let localApiConfig = readStoredApiConfig();
 let latestProfile = null;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const FLOWING_POINTS_IMAGE = "./assets/GitHub_Invertocat_Black.png";
 
 const presetAccentMap = {
   "最推荐": "#1d5f4c",
@@ -485,6 +487,187 @@ function initReportTabLiquid() {
   });
 
   window.addEventListener("resize", () => syncReportTabLens());
+}
+
+function updateFullpageParallax() {
+  if (!introSection || !workspaceSection) {
+    return;
+  }
+
+  const workspaceTop = Math.max(1, workspaceSection.offsetTop);
+  const progress = Math.min(Math.max(window.scrollY / workspaceTop, 0), 1);
+  const easedProgress = 1 - Math.pow(1 - progress, 2);
+  const bridgeShift = (easedProgress - 0.5) * 92;
+  const bridgeOpacity = 0.36 - Math.abs(progress - 0.5) * 0.28;
+  const particleOpacity = 0.82 - progress * 0.46;
+
+  document.documentElement.style.setProperty("--bridge-shift", `${bridgeShift.toFixed(1)}px`);
+  document.documentElement.style.setProperty("--bridge-opacity", bridgeOpacity.toFixed(2));
+  document.documentElement.style.setProperty("--particle-opacity", particleOpacity.toFixed(2));
+  introSection.style.setProperty("--intro-scroll-y", `${(progress * 52).toFixed(1)}px`);
+}
+
+function initFlowingPointsBackground() {
+  if (
+    !flowingPointsCanvas ||
+    prefersReducedMotion.matches ||
+    !window.matchMedia("(min-width: 901px)").matches
+  ) {
+    updateFullpageParallax();
+    return;
+  }
+
+  const context = flowingPointsCanvas.getContext("2d", { alpha: true });
+  if (!context) {
+    return;
+  }
+
+  const state = {
+    animationFrame: 0,
+    context,
+    image: new Image(),
+    mouseX: Number.POSITIVE_INFINITY,
+    mouseY: Number.POSITIVE_INFINITY,
+    particles: [],
+    pixelRatio: Math.min(window.devicePixelRatio || 1, 1.75),
+    scrollLift: 0,
+    width: 0,
+    height: 0
+  };
+
+  const rebuildParticles = () => {
+    const introRect = introSection?.getBoundingClientRect();
+    state.pixelRatio = Math.min(window.devicePixelRatio || 1, 1.75);
+    state.width = Math.round(introRect?.width || window.innerWidth);
+    state.height = Math.round(introRect?.height || window.innerHeight);
+    flowingPointsCanvas.width = Math.round(state.width * state.pixelRatio);
+    flowingPointsCanvas.height = Math.round(state.height * state.pixelRatio);
+    flowingPointsCanvas.style.width = `${state.width}px`;
+    flowingPointsCanvas.style.height = `${state.height}px`;
+    state.context.setTransform(state.pixelRatio, 0, 0, state.pixelRatio, 0, 0);
+
+    if (!state.image.complete || !state.image.naturalWidth) {
+      return;
+    }
+
+    const imageScale = Math.min(1.46, Math.max(1.04, state.width / 1440));
+    const targetWidth = Math.min(460, Math.max(310, state.width * 0.28)) * imageScale;
+    const targetHeight = targetWidth * (state.image.naturalHeight / state.image.naturalWidth);
+    const sampleCanvas = document.createElement("canvas");
+    const sampleContext = sampleCanvas.getContext("2d", { willReadFrequently: true });
+    if (!sampleContext) {
+      return;
+    }
+
+    sampleCanvas.width = Math.round(targetWidth);
+    sampleCanvas.height = Math.round(targetHeight);
+    sampleContext.clearRect(0, 0, sampleCanvas.width, sampleCanvas.height);
+    sampleContext.drawImage(state.image, 0, 0, sampleCanvas.width, sampleCanvas.height);
+    const imageData = sampleContext.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height);
+    const points = [];
+    const sampleStep = state.width > 1360 ? 8 : 10;
+    const logoCenterX = state.width * 0.82;
+    const logoCenterY = state.height * 0.31;
+    const startX = logoCenterX - sampleCanvas.width / 2;
+    const startY = logoCenterY - sampleCanvas.height / 2;
+
+    for (let y = 0; y < sampleCanvas.height; y += sampleStep) {
+      for (let x = 0; x < sampleCanvas.width; x += sampleStep) {
+        const index = (y * sampleCanvas.width + x) * 4;
+        const alpha = imageData.data[index + 3];
+        const darkness = 255 - (imageData.data[index] + imageData.data[index + 1] + imageData.data[index + 2]) / 3;
+        if (alpha < 48 || darkness < 34) {
+          continue;
+        }
+
+        const originX = startX + x;
+        const originY = startY + y;
+        points.push({
+          originX,
+          originY,
+          vx: 0,
+          vy: 0,
+          x: originX + (Math.random() - 0.5) * 18,
+          y: originY + (Math.random() - 0.5) * 18
+        });
+      }
+    }
+
+    state.particles = points;
+  };
+
+  const handlePointerMove = (event) => {
+    state.mouseX = event.clientX;
+    state.mouseY = event.clientY;
+  };
+
+  const handlePointerLeave = () => {
+    state.mouseX = Number.POSITIVE_INFINITY;
+    state.mouseY = Number.POSITIVE_INFINITY;
+  };
+
+  const handleResize = () => {
+    rebuildParticles();
+    updateFullpageParallax();
+  };
+
+  const handleScroll = () => {
+    const workspaceTop = Math.max(1, workspaceSection?.offsetTop || window.innerHeight);
+    const progress = Math.min(Math.max(window.scrollY / workspaceTop, 0), 1);
+    state.scrollLift = progress * -22;
+    flowingPointsCanvas.style.opacity = progress > 0.94 ? "0" : "";
+  };
+
+  function drawFlowingPointsBackground() {
+    state.context.clearRect(0, 0, state.width, state.height);
+    state.context.save();
+    state.context.globalCompositeOperation = "lighter";
+
+    for (const particle of state.particles) {
+      const targetX = particle.originX;
+      const targetY = particle.originY + state.scrollLift;
+      const dx = particle.x - state.mouseX;
+      const dy = particle.y - state.mouseY;
+      const distanceSquared = dx * dx + dy * dy;
+      const repelRadius = 118;
+
+      if (distanceSquared < repelRadius * repelRadius) {
+        const distance = Math.sqrt(distanceSquared) || 1;
+        const force = (1 - distance / repelRadius) * 4.8;
+        particle.vx += (dx / distance) * force;
+        particle.vy += (dy / distance) * force;
+      }
+
+      particle.vx += (targetX - particle.x) * 0.026;
+      particle.vy += (targetY - particle.y) * 0.026;
+      particle.vx *= 0.86;
+      particle.vy *= 0.86;
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+
+      const glow = Math.min(1, Math.abs(particle.vx) + Math.abs(particle.vy));
+      state.context.fillStyle = glow > 0.42 ? "rgba(243, 199, 131, 0.72)" : "rgba(141, 241, 255, 0.58)";
+      state.context.beginPath();
+      state.context.arc(particle.x, particle.y, glow > 0.42 ? 1.8 : 1.35, 0, Math.PI * 2);
+      state.context.fill();
+    }
+
+    state.context.restore();
+    state.animationFrame = requestAnimationFrame(drawFlowingPointsBackground);
+  }
+
+  state.image.addEventListener("load", () => {
+    rebuildParticles();
+    drawFlowingPointsBackground();
+  }, { once: true });
+  state.image.src = FLOWING_POINTS_IMAGE;
+
+  window.addEventListener("pointermove", handlePointerMove);
+  window.addEventListener("pointerleave", handlePointerLeave);
+  window.addEventListener("resize", handleResize);
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("scroll", updateFullpageParallax, { passive: true });
+  updateFullpageParallax();
 }
 
 function scrollToWorkspace() {
@@ -996,6 +1179,7 @@ function handleApiPanelToggleClick(event) {
 }
 
 apiKeyInput.value = localApiConfig.apiKey;
+initFlowingPointsBackground();
 initFullpageIntroScroll();
 initReportTabLiquid();
 initApiOrbDrag();

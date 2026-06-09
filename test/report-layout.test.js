@@ -44,6 +44,37 @@ test("homepage opens with a fullpage parallax intro before the workspace", async
   assert.match(appJs, /window\.addEventListener\("wheel", handleFullpageWheel,\s*\{\s*passive:\s*false\s*\}\);/s);
 });
 
+test("desktop intro owns the flowing point logo without leaking into workspace", async () => {
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+  const appJs = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+  const particleAsset = await readFile(new URL("../public/assets/GitHub_Invertocat_Black.png", import.meta.url));
+  const introStart = html.indexOf('id="intro-section"');
+  const canvasStart = html.indexOf('id="flowing-points-canvas"');
+  const workspaceStart = html.indexOf('id="workspace-section"');
+
+  assert.ok(canvasStart > introStart);
+  assert.ok(canvasStart < workspaceStart);
+  assert.match(html, /id="flowing-points-canvas"/);
+  assert.match(html, /class="flowing-points-canvas"/);
+  assert.match(html, /class="background-depth-bridge"/);
+  assert.ok(particleAsset.length > 1000);
+  assert.match(css, /\.intro-section\s+\.flowing-points-canvas\s*\{[^}]*position:\s*absolute;[^}]*mix-blend-mode:\s*screen;/s);
+  assert.doesNotMatch(css, /\.flowing-points-canvas\s*\{[^}]*position:\s*fixed;/s);
+  assert.match(css, /\.background-depth-bridge\s*\{[^}]*transform:\s*translate3d\(0,\s*var\(--bridge-shift,\s*0px\),\s*0\);/s);
+  assert.match(css, /@media \(max-width:\s*900px\)\s*\{[\s\S]*\.flowing-points-canvas\s*\{[^}]*display:\s*none;/);
+  assert.match(appJs, /const flowingPointsCanvas = document\.querySelector\("#flowing-points-canvas"\);/);
+  assert.match(appJs, /const FLOWING_POINTS_IMAGE = "\.\/assets\/GitHub_Invertocat_Black\.png";/);
+  assert.match(appJs, /function initFlowingPointsBackground\(\)/);
+  assert.match(appJs, /function drawFlowingPointsBackground\(\)/);
+  assert.match(appJs, /new Image\(\)/);
+  assert.match(appJs, /if \(alpha < 48 \|\| darkness < 34\)/);
+  assert.match(appJs, /const logoCenterX = state\.width \* 0\.82;/);
+  assert.match(appJs, /const logoCenterY = state\.height \* 0\.31;/);
+  assert.match(appJs, /function updateFullpageParallax\(\)/);
+  assert.match(appJs, /window\.addEventListener\("scroll", updateFullpageParallax,\s*\{\s*passive:\s*true\s*\}\);/s);
+});
+
 test("hero api entry and report spacing follow the annotated layout", async () => {
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
   const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");

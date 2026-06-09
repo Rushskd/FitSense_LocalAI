@@ -17,6 +17,7 @@ FitSense LocalAI 是一个面向个人训练、饮食和恢复规划的本地优
 | --- | --- |
 | 本地优先分析 | 即使没有 DeepSeek API Key，也能基于本地规则生成 BMI、活动评分、训练方向和饮食建议。 |
 | 全屏开场页 | 首页先呈现带轻量视差层的开场页，向下滚动一次进入数据统计工作台，在工作台顶端向上滚动一次返回首页。 |
+| 首页粒子图标 | PC 端首页右侧使用 GitHub Invertocat 图片采样生成粒子图标，移动端关闭该效果以保持滑动流畅。 |
 | DeepSeek 增强报告 | 支持服务端 `.env` API Key，也支持用户在浏览器临时填写自己的 Key，通过本地代理生成结构化中文报告。 |
 | 鲸鱼悬浮入口 | DeepSeek 接入状态收纳为可拖动的鲸鱼悬浮球，点击后直接打开详情，减少对主页面布局的干扰。 |
 | 移动端吸附体验 | 移动端悬浮球保留边缘吸附、轻量淡入和无冗余方形底框，降低滑动与点击时的卡顿感。 |
@@ -34,6 +35,7 @@ FitSense LocalAI 的界面不是传统表单工具，而是一个偏产品化的
 | 区域 | 设计目标 |
 | --- | --- |
 | 开场页 | 用全屏滚动、网格视差、轨道光效和进入按钮建立项目展示感，用户向下滑动后再进入具体功能界面。 |
+| 粒子图标 | 将 GitHub Invertocat 图标转换为右侧点阵粒子，作为首页专属视觉层，滚动到工作台后不再显示。 |
 | Hero 区 | 用大标题、液态玻璃胶囊和柔和背景纹理建立第一视觉焦点。 |
 | 输入区 | 保留核心身体数据字段，降低用户填写成本。 |
 | 概览区 | 将 BMI、活动评分、目标方向等基础指标卡片化。 |
@@ -69,10 +71,11 @@ flowchart TB
 
 | 路径 | 作用 |
 | --- | --- |
-| `public/index.html` | 页面结构、全屏开场页、SVG 玻璃滤镜、报告 tab、饮食详情弹层和 DeepSeek 入口。 |
-| `public/styles.css` | Liquid Glass 视觉系统、开场页视差层、响应式布局、tab 间距、移动端性能优化和悬浮球样式。 |
-| `public/app.js` | 全屏开场滚动、表单提交、API 状态、报告渲染、tab 切换、悬浮球拖拽/点击和饮食详情交互。 |
+| `public/index.html` | 页面结构、全屏开场页、首页粒子 canvas、SVG 玻璃滤镜、报告 tab、饮食详情弹层和 DeepSeek 入口。 |
+| `public/styles.css` | Liquid Glass 视觉系统、开场页视差层、首页粒子层、响应式布局、tab 间距、移动端性能优化和悬浮球样式。 |
+| `public/app.js` | 全屏开场滚动、粒子图标采样与动画、表单提交、API 状态、报告渲染、tab 切换、悬浮球拖拽/点击和饮食详情交互。 |
 | `public/ui-state.js` | 前端派生状态、评分逻辑、饮食方法一周详情。 |
+| `public/assets/GitHub_Invertocat_Black.png` | 首页粒子图标采样源图。 |
 | `src/analyze.js` | 本地 BMI、训练建议、饮食策略和 fallback 结构化计划。 |
 | `src/llm.js` | DeepSeek 配置解析、请求体构建、JSON 报告解析和兜底。 |
 | `src/env.js` | 读取 `.env` 并合并到运行环境。 |
@@ -178,7 +181,7 @@ FitSense LocalAI 是健康规划辅助工具，不是医疗诊断系统。
 | `test/analyze.test.js` | BMI、目标判断、本地结构化训练与饮食方案。 |
 | `test/llm.test.js` | DeepSeek 配置解析、请求体构建、结构化 JSON 解析和 fallback。 |
 | `test/ui-state.test.js` | 前端评分、报告来源状态、饮食详情一周计划。 |
-| `test/report-layout.test.js` | 全屏开场页、原始回包隐藏、饮食详情入口、GitHub Pages 路径、tab 间距、字体加载和悬浮球布局约束。 |
+| `test/report-layout.test.js` | 全屏开场页、首页粒子层、原始回包隐藏、饮食详情入口、GitHub Pages 路径、tab 间距、字体加载和悬浮球布局约束。 |
 
 最近一次完整验证：
 
@@ -186,7 +189,7 @@ FitSense LocalAI 是健康规划辅助工具，不是医疗诊断系统。
 node --test
 ```
 
-结果：33 个测试全部通过。
+结果：34 个测试全部通过。
 
 ## 路线图
 
@@ -197,6 +200,16 @@ node --test
 | P2 | 支持更多训练目标，如塑形、体态改善、康复后恢复训练。 |
 | P2 | 增加用户历史记录、本地多方案对比和周期化训练追踪。 |
 | P3 | 为饮食模块加入更多可配置参数，如餐次、忌口、预算、外食频率。 |
+
+## 引用与来源
+
+| 内容 | 来源 | 用途说明 |
+| --- | --- | --- |
+| 粒子交互灵感 | [BlackCoder0/Arknights-FlowingPoints](https://github.com/BlackCoder0/Arknights-FlowingPoints) | 参考“图片采样为粒子、鼠标排斥、粒子回弹”的交互思路；本项目重新实现为首页专属轻量 canvas 粒子层。 |
+| GitHub Invertocat 图标 | [GitHub Brand Toolkit](https://brand.github.com/foundations/logo) / 本地素材 `public/assets/GitHub_Invertocat_Black.png` | 用作首页右侧粒子图标的采样源。GitHub、Octocat、Invertocat 等标识归 GitHub 所有。 |
+| DeepSeek 鲸鱼标识 | [DeepSeek 官方网站](https://www.deepseek.com/) / 本地素材 `public/assets/deepseek-color.svg` | 用作 DeepSeek 接入入口的悬浮球图标。DeepSeek 名称与标识归其权利方所有。 |
+| 字体资源 | `public/assets/fonts/` 内的本地字体文件 | 用于中文标题、正文和快速加载路径；请在分发或商用前确认字体授权范围。 |
+| 徽章样式 | [Shields.io](https://shields.io/) | README 顶部项目状态徽章。 |
 
 ## License
 
