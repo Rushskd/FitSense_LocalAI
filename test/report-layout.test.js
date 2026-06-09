@@ -19,6 +19,31 @@ test("report layout hides raw reply tab and includes nutrition detail view", asy
   assert.match(html, /id="precision-progress"/);
 });
 
+test("homepage opens with a fullpage parallax intro before the workspace", async () => {
+  const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");
+  const appJs = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+  const introStart = html.indexOf('id="intro-section"');
+  const workspaceStart = html.indexOf('id="workspace-section"');
+
+  assert.ok(introStart > -1);
+  assert.ok(workspaceStart > introStart);
+  assert.match(html, /data-fullpage-section="intro"/);
+  assert.match(html, /id="intro-enter"/);
+  assert.match(html, /class="intro-parallax intro-grid"/);
+  assert.match(html, /class="workspace-section fullpage-section"/);
+  assert.match(css, /\.liquid-stage\s*\{[^}]*scroll-snap-type:\s*y mandatory;/s);
+  assert.match(css, /\.fullpage-section\s*\{[^}]*min-height:\s*100svh;[^}]*scroll-snap-align:\s*start;/s);
+  assert.match(css, /\.intro-section\s*\{[^}]*overflow:\s*hidden;/s);
+  assert.match(css, /\.intro-parallax\s*\{[^}]*transform:/s);
+  assert.match(css, /\.workspace-section\s*\{[^}]*padding:\s*28px 0 52px;/s);
+  assert.match(appJs, /const introSection = document\.querySelector\("#intro-section"\);/);
+  assert.match(appJs, /function initFullpageIntroScroll\(\)/);
+  assert.match(appJs, /function scrollToWorkspace\(\)/);
+  assert.match(appJs, /function scrollToIntro\(\)/);
+  assert.match(appJs, /window\.addEventListener\("wheel", handleFullpageWheel,\s*\{\s*passive:\s*false\s*\}\);/s);
+});
+
 test("hero api entry and report spacing follow the annotated layout", async () => {
   const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
   const css = await readFile(new URL("../public/styles.css", import.meta.url), "utf8");

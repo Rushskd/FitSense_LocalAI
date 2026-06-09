@@ -5,7 +5,7 @@
 ![GitHub Pages](https://img.shields.io/badge/Deploy-GitHub%20Pages-24292f?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-c7a75b?style=for-the-badge)
 
-FitSense LocalAI 是一个面向个人训练、饮食和恢复规划的本地优先健康分析工作台。它用清晰的身体数据输入、结构化训练模块、饮食策略推荐和 DeepSeek 中文报告生成，把“我该怎么练、怎么吃、怎么坚持”整理成可执行的一页式方案。
+FitSense LocalAI 是一个面向个人训练、饮食和恢复规划的本地优先健康分析工作台。它用全屏开场页、清晰的身体数据输入、结构化训练模块、饮食策略推荐和 DeepSeek 中文报告生成，把“我该怎么练、怎么吃、怎么坚持”整理成可执行的一页式方案。
 
 在线预览：[https://rushskd.github.io/FitSense_LocalAI/](https://rushskd.github.io/FitSense_LocalAI/)
 
@@ -16,6 +16,7 @@ FitSense LocalAI 是一个面向个人训练、饮食和恢复规划的本地优
 | 能力 | 说明 |
 | --- | --- |
 | 本地优先分析 | 即使没有 DeepSeek API Key，也能基于本地规则生成 BMI、活动评分、训练方向和饮食建议。 |
+| 全屏开场页 | 首页先呈现带轻量视差层的开场页，向下滚动一次进入数据统计工作台，在工作台顶端向上滚动一次返回首页。 |
 | DeepSeek 增强报告 | 支持服务端 `.env` API Key，也支持用户在浏览器临时填写自己的 Key，通过本地代理生成结构化中文报告。 |
 | 鲸鱼悬浮入口 | DeepSeek 接入状态收纳为可拖动的鲸鱼悬浮球，点击后直接打开详情，减少对主页面布局的干扰。 |
 | 移动端吸附体验 | 移动端悬浮球保留边缘吸附、轻量淡入和无冗余方形底框，降低滑动与点击时的卡顿感。 |
@@ -32,6 +33,7 @@ FitSense LocalAI 的界面不是传统表单工具，而是一个偏产品化的
 
 | 区域 | 设计目标 |
 | --- | --- |
+| 开场页 | 用全屏滚动、网格视差、轨道光效和进入按钮建立项目展示感，用户向下滑动后再进入具体功能界面。 |
 | Hero 区 | 用大标题、液态玻璃胶囊和柔和背景纹理建立第一视觉焦点。 |
 | 输入区 | 保留核心身体数据字段，降低用户填写成本。 |
 | 概览区 | 将 BMI、活动评分、目标方向等基础指标卡片化。 |
@@ -67,9 +69,9 @@ flowchart TB
 
 | 路径 | 作用 |
 | --- | --- |
-| `public/index.html` | 页面结构、SVG 玻璃滤镜、报告 tab、饮食详情弹层和 DeepSeek 入口。 |
-| `public/styles.css` | Liquid Glass 视觉系统、响应式布局、tab 间距、移动端性能优化和悬浮球样式。 |
-| `public/app.js` | 表单提交、API 状态、报告渲染、tab 切换、悬浮球拖拽/点击和饮食详情交互。 |
+| `public/index.html` | 页面结构、全屏开场页、SVG 玻璃滤镜、报告 tab、饮食详情弹层和 DeepSeek 入口。 |
+| `public/styles.css` | Liquid Glass 视觉系统、开场页视差层、响应式布局、tab 间距、移动端性能优化和悬浮球样式。 |
+| `public/app.js` | 全屏开场滚动、表单提交、API 状态、报告渲染、tab 切换、悬浮球拖拽/点击和饮食详情交互。 |
 | `public/ui-state.js` | 前端派生状态、评分逻辑、饮食方法一周详情。 |
 | `src/analyze.js` | 本地 BMI、训练建议、饮食策略和 fallback 结构化计划。 |
 | `src/llm.js` | DeepSeek 配置解析、请求体构建、JSON 报告解析和兜底。 |
@@ -176,7 +178,7 @@ FitSense LocalAI 是健康规划辅助工具，不是医疗诊断系统。
 | `test/analyze.test.js` | BMI、目标判断、本地结构化训练与饮食方案。 |
 | `test/llm.test.js` | DeepSeek 配置解析、请求体构建、结构化 JSON 解析和 fallback。 |
 | `test/ui-state.test.js` | 前端评分、报告来源状态、饮食详情一周计划。 |
-| `test/report-layout.test.js` | 原始回包隐藏、饮食详情入口、GitHub Pages 路径、tab 间距、字体加载和悬浮球布局约束。 |
+| `test/report-layout.test.js` | 全屏开场页、原始回包隐藏、饮食详情入口、GitHub Pages 路径、tab 间距、字体加载和悬浮球布局约束。 |
 
 最近一次完整验证：
 
@@ -184,7 +186,7 @@ FitSense LocalAI 是健康规划辅助工具，不是医疗诊断系统。
 node --test
 ```
 
-结果：30 个测试全部通过。
+结果：33 个测试全部通过。
 
 ## 路线图
 

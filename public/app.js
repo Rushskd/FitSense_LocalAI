@@ -17,6 +17,9 @@ const apiBadge = document.querySelector("#api-badge");
 const apiPanelToggle = document.querySelector("#api-panel-toggle");
 const apiPanelBody = document.querySelector("#api-panel-body");
 const heroGrid = document.querySelector(".hero-grid");
+const introSection = document.querySelector("#intro-section");
+const workspaceSection = document.querySelector("#workspace-section");
+const introEnterButton = document.querySelector("#intro-enter");
 const modelName = document.querySelector("#model-name");
 const apiDetail = document.querySelector("#api-detail");
 const sourcePill = document.querySelector("#source-pill");
@@ -84,6 +87,7 @@ let serverConfig = {
 };
 let localApiConfig = readStoredApiConfig();
 let latestProfile = null;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 const presetAccentMap = {
   "最推荐": "#1d5f4c",
@@ -451,7 +455,7 @@ function initReportTabLiquid() {
   if (
     !reportTabsContainer ||
     !reportTabLens ||
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    prefersReducedMotion.matches ||
     window.matchMedia("(pointer: coarse)").matches
   ) {
     return;
@@ -481,6 +485,141 @@ function initReportTabLiquid() {
   });
 
   window.addEventListener("resize", () => syncReportTabLens());
+}
+
+function scrollToWorkspace() {
+  workspaceSection?.scrollIntoView({
+    behavior: prefersReducedMotion.matches ? "auto" : "smooth",
+    block: "start"
+  });
+}
+
+function scrollToIntro() {
+  introSection?.scrollIntoView({
+    behavior: prefersReducedMotion.matches ? "auto" : "smooth",
+    block: "start"
+  });
+}
+
+function initFullpageIntroScroll() {
+  if (!introSection || !workspaceSection) {
+    return;
+  }
+
+  let transitionLocked = false;
+  let touchStartY = null;
+  let parallaxFrame = 0;
+
+  const lockTransition = () => {
+    transitionLocked = true;
+    window.setTimeout(() => {
+      transitionLocked = false;
+    }, prefersReducedMotion.matches ? 180 : 760);
+  };
+
+  const workspaceTop = () => workspaceSection.offsetTop;
+  const isOnIntro = () => window.scrollY < workspaceTop() * 0.55;
+  const isAtWorkspaceTop = () => Math.abs(window.scrollY - workspaceTop()) < 18;
+  const shouldIgnoreTarget = (target) => target?.closest?.(".hero-grid, input, textarea, select, button, a, [role='dialog']");
+
+  const goWorkspace = (event) => {
+    event?.preventDefault?.();
+    lockTransition();
+    scrollToWorkspace();
+  };
+
+  const goIntro = (event) => {
+    event?.preventDefault?.();
+    lockTransition();
+    scrollToIntro();
+  };
+
+  function handleFullpageWheel(event) {
+    if (transitionLocked || document.body.classList.contains("detail-open")) {
+      return;
+    }
+
+    if (isOnIntro() && event.deltaY > 18) {
+      goWorkspace(event);
+      return;
+    }
+
+    if (isAtWorkspaceTop() && event.deltaY < -18) {
+      goIntro(event);
+    }
+  }
+
+  const handleIntroPointerMove = (event) => {
+    if (prefersReducedMotion.matches || parallaxFrame) {
+      return;
+    }
+
+    parallaxFrame = requestAnimationFrame(() => {
+      const rect = introSection.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width - 0.5) * 18;
+      const y = ((event.clientY - rect.top) / rect.height - 0.5) * 18;
+      introSection.style.setProperty("--intro-pointer-x", x.toFixed(2));
+      introSection.style.setProperty("--intro-pointer-y", y.toFixed(2));
+      parallaxFrame = 0;
+    });
+  };
+
+  const handleFullpageKeydown = (event) => {
+    if (transitionLocked || event.defaultPrevented || shouldIgnoreTarget(event.target)) {
+      return;
+    }
+
+    const downKeys = ["ArrowDown", "PageDown", " "];
+    const upKeys = ["ArrowUp", "PageUp"];
+    if (isOnIntro() && downKeys.includes(event.key)) {
+      goWorkspace(event);
+      return;
+    }
+
+    if (isAtWorkspaceTop() && upKeys.includes(event.key)) {
+      goIntro(event);
+    }
+  };
+
+  const handleTouchStart = (event) => {
+    if (transitionLocked || shouldIgnoreTarget(event.target)) {
+      touchStartY = null;
+      return;
+    }
+
+    touchStartY = event.touches[0]?.clientY ?? null;
+  };
+
+  const handleTouchEnd = (event) => {
+    if (transitionLocked || touchStartY === null) {
+      return;
+    }
+
+    const endY = event.changedTouches[0]?.clientY;
+    if (typeof endY !== "number") {
+      touchStartY = null;
+      return;
+    }
+
+    const deltaY = touchStartY - endY;
+    touchStartY = null;
+
+    if (isOnIntro() && deltaY > 34) {
+      goWorkspace(event);
+      return;
+    }
+
+    if (isAtWorkspaceTop() && deltaY < -34) {
+      goIntro(event);
+    }
+  };
+
+  introEnterButton?.addEventListener("click", scrollToWorkspace);
+  introSection.addEventListener("pointermove", handleIntroPointerMove);
+  window.addEventListener("wheel", handleFullpageWheel, { passive: false });
+  window.addEventListener("keydown", handleFullpageKeydown);
+  window.addEventListener("touchstart", handleTouchStart, { passive: true });
+  window.addEventListener("touchend", handleTouchEnd, { passive: false });
 }
 
 function setStatus(text = "", state = "normal") {
@@ -857,6 +996,7 @@ function handleApiPanelToggleClick(event) {
 }
 
 apiKeyInput.value = localApiConfig.apiKey;
+initFullpageIntroScroll();
 initReportTabLiquid();
 initApiOrbDrag();
 loadApiStatus();
